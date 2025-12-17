@@ -1,0 +1,781 @@
+<div class="helpdesk-container">
+  <!-- Access Control - Show appropriate message if not authorized -->
+  <div *ngIf="!isAuthenticated()" class="access-control-container">
+    <div class="access-card">
+      <div class="access-header">
+        <img src="/images/Prescripto.png" alt="Prescripto" class="logo">
+        <h2>Helpdesk Access Required</h2>
+        <p>Healthcare Management System</p>
+      </div>
+
+      <div class="access-content">
+        <div *ngIf="!authService.isLoggedIn()" class="not-logged-in">
+          <div class="access-message">
+            <i class="fas fa-sign-in-alt access-icon"></i>
+            <h3>Please Login First</h3>
+            <p>You need to be logged in to access the helpdesk dashboard.</p>
+            <button class="access-button" (click)="goToLogin()">
+              <i class="fas fa-sign-in-alt me-2"></i>Go to Login
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="authService.isLoggedIn() && !currentAgent" class="access-denied">
+          <div class="access-message">
+            <i class="fas fa-ban access-icon"></i>
+            <h3>Access Denied</h3>
+            <p>You need helpdesk role to access this area. Current role: {{ authService.getCurrentUserSnapshot()?.role }}</p>
+            <p>Please contact your administrator if you believe this is an error.</p>
+            <button class="access-button secondary" (click)="goToHome()">
+              <i class="fas fa-home me-2"></i>Go to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard - Only show if authenticated with helpdesk role -->
+  <div *ngIf="isAuthenticated()" class="dashboard">
+    <!-- Header -->
+    <div class="header">
+      <h1>Helpdesk Dashboard</h1>
+      <div class="header-actions">
+        <button 
+          class="status-toggle"
+          [class.available]="currentAgent?.isAvailable"
+          (click)="toggleAgentAvailability()">
+          {{ currentAgent?.isAvailable ? 'Available' : 'Not Available' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div *ngIf="isLoading" class="loading-indicator">
+      Loading...
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-tabs">
+      <button 
+        class="nav-tab"
+        [class.active]="activeTab === 'dashboard'"
+        (click)="setActiveTab('dashboard')">Dashboard</button>
+      <button 
+        class="nav-tab"
+        [class.active]="activeTab === 'patients'"
+        (click)="setActiveTab('patients')">Patients ({{ totalPatients }})</button>
+      <button 
+        class="nav-tab"
+        [class.active]="activeTab === 'doctors'"
+        (click)="setActiveTab('doctors')">Doctors ({{ getAvailableDoctorsCount() }} Available)</button>
+      <button 
+        class="nav-tab"
+        [class.active]="activeTab === 'appointments'"
+        (click)="setActiveTab('appointments')">Book Appointment</button>
+      <button 
+        class="nav-tab"
+        [class.active]="activeTab === 'todaysAppointments'"
+        (click)="setActiveTab('todaysAppointments'); loadTodaysAppointments()">Today's Appointments ({{ dashboardStats.totalAppointmentsToday }})</button>
+      <button 
+        class="nav-tab"
+        [class.active]="activeTab === 'payments'"
+        (click)="setActiveTab('payments')">Payments</button>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Dashboard Tab -->
+      <div *ngIf="activeTab === 'dashboard'" class="tab-content">
+        <h2>Dashboard Overview</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>{{ dashboardStats.totalPatients }}</h3>
+            <p>Total Patients</p>
+          </div>
+          <div class="stat-card">
+            <h3>{{ getAvailableDoctorsCount() }}</h3>
+            <p>Available Doctors</p>
+          </div>
+          <div class="stat-card">
+            <h3>{{ dashboardStats.totalAppointmentsToday }}</h3>
+            <p>Today's Appointments</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Patients Tab -->
+      <div *ngIf="activeTab === 'patients'" class="tab-content">
+        <h2>Patient Management</h2>
+        <p class="patient-count">Total Patients: <strong>{{ totalPatients }}</strong></p>
+        
+        <div class="search-section">
+          <div class="search-options">
+            <div class="search-by-name">
+              <label>Search by Name:</label>
+              <input 
+                type="text" 
+                [(ngModel)]="patientSearchName"
+                placeholder="Search by patient name..."
+                class="search-input"
+                (input)="onPatientSearchInput()"
+                (keyup.enter)="searchPatients()">
+              <button class="search-btn" (click)="searchPatients()">Search</button>
+            </div>
+            
+            <div class="search-by-id">
+              <label>Search by ID:</label>
+              <input 
+                type="number" 
+                #patientIdInput
+                placeholder="Enter patient ID..."
+                class="search-input">
+              <button class="search-btn" (click)="getPatientById(+patientIdInput.value); patientIdInput.value=''">Get Patient</button>
+            </div>
+            
+            <button class="clear-search-btn" (click)="clearPatientSearch()">Show All Patients</button>
+          </div>
+        </div>
+
+        <div class="patient-list">
+          <div *ngFor="let patient of searchedPatients.length > 0 ? searchedPatients : allPatients" 
+               class="patient-item"
+               [class.selected]="selectedPatient?.userId === patient.userId"
+               [class.has-appointment]="hasAppointmentToday(patient.userName)"
+               (click)="selectPatient(patient)">
+            <div class="patient-header">
+              <h4>{{ patient.userName }}</h4>
+              <span *ngIf="hasAppointmentToday(patient.userName)" class="appointment-indicator" title="Patient already has an appointment today">
+                <i class="fas fa-calendar-check"></i> Has Appointment Today
+              </span>
+            </div>
+            <p>ID: {{ patient.userId }} | {{ patient.email }}</p>
+            <p>Phone: {{ patient.phoneNumber }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="selectedPatient" class="patient-details">
+          <h3>Patient Details</h3>
+          <p><strong>Name:</strong> {{ selectedPatient.userName }}</p>
+          <p><strong>Email:</strong> {{ selectedPatient.email }}</p>
+          <p><strong>Phone:</strong> {{ selectedPatient.phoneNumber }}</p>
+          <p *ngIf="selectedPatient.emergencyContactName"><strong>Emergency Contact:</strong> {{ selectedPatient.emergencyContactName }} ({{ selectedPatient.emergencyContactRelationship }})</p>
+          <p *ngIf="selectedPatient.emergencyContactPhoneNumber"><strong>Emergency Phone:</strong> {{ selectedPatient.emergencyContactPhoneNumber }}</p>
+        </div>
+      </div>
+
+      <!-- Doctors Tab -->
+      <div *ngIf="activeTab === 'doctors'" class="tab-content">
+        <h2>Doctor Management</h2>
+        <p class="doctor-count">Total Doctors: <strong>{{ totalDoctors }}</strong> | Available: <strong>{{ getAvailableDoctorsCount() }}</strong></p>
+        
+        <div class="search-section">
+          <div class="search-options">
+            <div class="search-by-name">
+              <label>Search by Name:</label>
+              <input 
+                type="text" 
+                [(ngModel)]="doctorSearchName"
+                (input)="onDoctorSearchInput()"
+                (keyup.enter)="searchDoctors()"
+                placeholder="Enter doctor name..."
+                class="search-input">
+              <button class="search-btn" (click)="searchDoctors()">Search</button>
+            </div>
+            
+            <div class="search-by-id">
+              <label>Search by ID:</label>
+              <input 
+                type="number" 
+                #doctorIdInput
+                placeholder="Enter doctor ID..."
+                class="search-input">
+              <button class="search-btn" (click)="getDoctorById(+doctorIdInput.value); doctorIdInput.value=''">Get Doctor</button>
+            </div>
+            
+            <div class="search-by-specialization">
+              <label>Search by Specialization:</label>
+              <input 
+                type="text" 
+                #specializationInput
+                placeholder="e.g., Cardiologist, Dermatologist..."
+                class="search-input">
+              <button class="search-btn" (click)="getDoctorsBySpecialization(specializationInput.value); specializationInput.value=''">Search</button>
+            </div>
+            
+            <button class="clear-search-btn" (click)="clearDoctorSearch()">Show All Doctors</button>
+          </div>
+        </div>
+
+        <div class="doctor-list">
+          <div *ngFor="let doctor of searchedDoctors.length > 0 ? searchedDoctors : allDoctors" 
+               class="doctor-item"
+               [class.selected]="selectedDoctor?.userId === doctor.userId"
+               (click)="selectDoctor(doctor)">
+            <h4>Dr. {{ doctor.userName }}</h4>
+            <p><strong>ID:</strong> {{ doctor.userId }} | <strong>Email:</strong> {{ doctor.email }}</p>
+            <p><strong>Specialization:</strong> {{ doctor.specialization }}</p>
+            <p><strong>Experience:</strong> {{ doctor.experience }} years | <strong>Qualification:</strong> {{ doctor.qualification }}</p>
+            <p><strong>Fee:</strong> ₹{{ doctor.consultant_fees }} | <strong>Phone:</strong> {{ doctor.phoneNumber }}</p>
+            <span class="status" [class.available]="doctor.isAvailable" [class.offline]="!doctor.isAvailable">
+              {{ doctor.isAvailable ? 'Online' : 'Offline' }}
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="selectedDoctor" class="doctor-details">
+          <h3>Doctor Details</h3>
+          <div class="doctor-info-grid">
+            <div class="info-section">
+              <h4>Basic Information</h4>
+              <p><strong>Name:</strong> Dr. {{ selectedDoctor.userName }}</p>
+              <p><strong>Email:</strong> {{ selectedDoctor.email }}</p>
+              <p><strong>Phone:</strong> {{ selectedDoctor.phoneNumber }}</p>
+              <p><strong>Status:</strong> 
+                <span class="status-indicator" [class.online]="selectedDoctor.isAvailable" [class.offline]="!selectedDoctor.isAvailable">
+                  {{ selectedDoctor.isAvailable ? 'Online' : 'Offline' }}
+                </span>
+              </p>
+            </div>
+            <div class="info-section">
+              <h4>Professional Details</h4>
+              <p><strong>Specialization:</strong> {{ selectedDoctor.specialization }}</p>
+              <p><strong>Qualification:</strong> {{ selectedDoctor.qualification }}</p>
+              <p><strong>Experience:</strong> {{ selectedDoctor.experience }} years</p>
+              <p><strong>Consultation Fee:</strong> ₹{{ selectedDoctor.consultant_fees }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointments Tab -->
+      <div *ngIf="activeTab === 'appointments'" class="tab-content">
+        <h2>Book Appointment for Patient</h2>
+        
+        <!-- Selected Patient and Doctor Display -->
+        <div class="selection-cards">
+          <div class="selected-card">
+            <h3>Selected Patient</h3>
+            <div *ngIf="selectedPatient" class="patient-info">
+              <p><strong>{{ selectedPatient.userName }}</strong></p>
+              <p>ID: {{ selectedPatient.userId }} | Email: {{ selectedPatient.email }}</p>
+              <button class="change-btn" (click)="setActiveTab('patients')">Change Patient</button>
+            </div>
+            <div *ngIf="!selectedPatient" class="no-selection">
+              <p>No patient selected. Please select a patient first.</p>
+              <button class="select-btn" (click)="setActiveTab('patients')">Select Patient</button>
+            </div>
+          </div>
+
+          <div class="selected-card">
+            <h3>Selected Doctor</h3>
+            <div *ngIf="selectedDoctor" class="doctor-info">
+              <p><strong>Dr. {{ selectedDoctor.userName }}</strong></p>
+              <p>{{ selectedDoctor.specialization }} | Fee: ₹{{ selectedDoctor.consultant_fees }}</p>
+              <button class="change-btn" (click)="setActiveTab('doctors')">Change Doctor</button>
+            </div>
+            <div *ngIf="!selectedDoctor" class="no-selection">
+              <p>No doctor selected. Please select a doctor first.</p>
+              <button class="select-btn" (click)="setActiveTab('doctors')">Select Doctor</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- EXACT SAME BOOKING INTERFACE AS DOCTOR-DETAIL -->
+        <div *ngIf="selectedPatient && selectedDoctor" class="booking-slots-card">
+          <h4><i class="fas fa-calendar-alt me-2"></i>Booking slots</h4>
+          
+          <!-- Current Date Display (TODAY ONLY) -->
+          <div class="current-date-display mb-4">
+            <div class="today-banner">
+              <i class="fas fa-calendar-day me-2"></i>
+              <span class="today-text">Appointments for Today Only</span>
+              <span class="today-date">{{ getCurrentDateFormatted() }}</span>
+            </div>
+            <small class="text-muted">
+              <i class="fas fa-info-circle me-1"></i>
+              Bookings are only available for today. Future date booking is not allowed.
+            </small>
+          </div>
+
+          <!-- Load Slots Button -->
+          <div *ngIf="!slotsLoaded" class="load-slots-section">
+            <button class="load-slots-btn" 
+                    (click)="loadDoctorSlots()"
+                    [disabled]="isLoadingSlots">
+              <span *ngIf="isLoadingSlots">Loading Slots...</span>
+              <span *ngIf="!isLoadingSlots">Load Available Slots for Dr. {{ selectedDoctor.userName }}</span>
+            </button>
+          </div>
+
+          <!-- Loading State -->
+          <div *ngIf="isLoadingSlots" class="loading-slots text-center py-4">
+            <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+            <p class="mt-2 text-muted">Loading doctor schedule...</p>
+          </div>
+
+          <!-- Complete Doctor Schedule Display -->
+          <div *ngIf="!isLoadingSlots && hasAnySlots()" class="time-slots-section">
+            
+            <!-- Slot Status Legend -->
+            <div class="slot-legend mb-4">
+              <h6 class="legend-title">
+                <i class="fas fa-calendar-day me-2"></i>Today's Schedule Only
+                <small class="text-muted">({{ getCurrentDateFormatted() }})</small>
+              </h6>
+              <div class="legend-items">
+                <div class="legend-item">
+                  <span class="legend-color available"></span>
+                  <span class="legend-text">Available Today</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color busy"></span>
+                  <span class="legend-text">Booked Today</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color not-available"></span>
+                  <span class="legend-text">Not Available (Time Passed)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Time Slots Grid - ALL STATUSES -->
+            <div class="time-slots-grid">
+              <div 
+                *ngFor="let slot of getAllTimeSlots()"
+                [class]="getSlotStatusClass(slot)"
+                [title]="getSlotStatusText(slot) + ' - ' + slot.time"
+                (click)="selectTimeSlot(slot)">
+                
+                <div class="slot-time">{{ slot.time }}</div>
+                <div class="slot-status">
+                  <i [class]="getSlotStatusIcon(slot)"></i>
+                  <span class="status-text">{{ getSlotStatusText(slot) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slot Summary for TODAY -->
+            <div class="slot-summary mt-3">
+              <div class="summary-stats">
+                <div class="stat-item">
+                  <span class="stat-number">{{ getAvailableSlotCount() }}</span>
+                  <span class="stat-label">Available Today</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">{{ getBusySlotCount() }}</span>
+                  <span class="stat-label">Booked Today</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">{{ getNotAvailableSlotCount() }}</span>
+                  <span class="stat-label">Time Passed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- No Slots Available -->
+          <div *ngIf="!isLoadingSlots && !hasAnySlots()" class="no-slots-message text-center py-4">
+            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No schedule available for today</h5>
+            <p class="text-muted">
+              Dr. {{ selectedDoctor?.userName }} is not available today.
+            </p>
+            <p class="text-muted">Please try selecting a different doctor.</p>
+          </div>
+
+          <!-- Medical History Upload -->
+          <div class="medical-history-upload mt-5" *ngIf="getAvailableSlotCount() > 0">
+            <h5><i class="fas fa-file-medical me-2"></i>Medical History Upload <span class="text-danger">*Required</span></h5>
+            <div class="upload-info mb-3">
+              <i class="fas fa-info-circle me-2"></i>
+              Please upload patient's medical history (PDF format, max 5MB) to help the doctor understand the condition better.
+            </div>
+            
+            <div class="file-upload-area">
+              <input 
+                type="file" 
+                id="medicalHistoryFile"
+                class="file-input" 
+                accept=".pdf"
+                (change)="onFileSelected($event)">
+              <label for="medicalHistoryFile" class="file-upload-btn">
+                <i class="fas fa-cloud-upload-alt me-2"></i>
+                Choose PDF File
+              </label>
+              
+              <!-- Selected File Display -->
+              <div *ngIf="selectedFile" class="selected-file-info mt-3">
+                <div class="file-details">
+                  <i class="fas fa-file-pdf text-danger me-2"></i>
+                  <span class="file-name">{{ selectedFile?.name || '' }}</span>
+                  <span class="file-size">({{ selectedFile ? getFileSize(selectedFile.size) : '' }})</span>
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-danger ms-3"
+                    (click)="removeFile()">
+                    <i class="fas fa-times"></i> Remove
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Upload Error -->
+              <div *ngIf="fileUploadError" class="alert alert-danger mt-3">
+                <i class="fas fa-exclamation-triangle me-2"></i>{{ fileUploadError }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Book Appointment Button -->
+          <div class="booking-action mt-4" *ngIf="getAvailableSlotCount() > 0">
+            <button 
+              class="book-appointment-button"
+              [disabled]="!selectedTimeSlot || !selectedFile || isBookingAppointment"
+              (click)="handleBookingClick()">
+              <span *ngIf="isBookingAppointment">
+                <i class="fas fa-spinner fa-spin me-2"></i>Booking appointment for {{ selectedPatient?.userName }}...
+              </span>
+              <span *ngIf="!isBookingAppointment">
+                Book appointment for {{ selectedPatient?.userName }}
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Appointments Tab -->
+      <div *ngIf="activeTab === 'todaysAppointments'" class="tab-content">
+        <h2>Today's Appointments</h2>
+        <p class="appointments-count">Total Appointments Today: <strong>{{ todaysAppointments.length }}</strong></p>
+        
+        <!-- Refresh Button -->
+        <div class="refresh-section">
+          <button class="refresh-btn" (click)="loadTodaysAppointments()" [disabled]="isLoading">
+            <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
+            {{ isLoading ? 'Loading...' : 'Refresh Appointments' }}
+          </button>
+        </div>
+        
+        <div *ngIf="todaysAppointments.length > 0" class="appointments-list">
+          <div *ngFor="let appointment of todaysAppointments" class="appointment-card">
+            <div class="appointment-header">
+              <div class="appointment-time">
+                <h4>{{ formatTime(appointment.appointmentStartTime) }} - {{ formatTime(appointment.appointmentEndTime) }}</h4>
+                <span class="appointment-status" [ngClass]="getAppointmentStatusClass(appointment.appointmentStatus)">
+                  {{ appointment.appointmentStatus }}
+                </span>
+              </div>
+              <div class="appointment-id">#{{ appointment.appointmentId }}</div>
+            </div>
+            
+            <div class="appointment-details">
+              <div class="detail-section">
+                <h5>Patient Information</h5>
+                <p><strong>Name:</strong> {{ appointment.patientName }}</p>
+                <p><strong>Patient ID:</strong> {{ appointment.patientId }}</p>
+              </div>
+              
+              <div class="detail-section">
+                <h5>Doctor Information</h5>
+                <p><strong>Name:</strong> Dr. {{ appointment.doctorName }}</p>
+                <p><strong>Doctor ID:</strong> {{ appointment.doctorId }}</p>
+                <p><strong>Specialization:</strong> {{ appointment.specialization }}</p>
+              </div>
+              
+              <div class="detail-section">
+                <h5>Booking Information</h5>
+                <p><strong>Date:</strong> {{ formatDate(appointment.appointmentDate) }}</p>
+                <p><strong>Booked By:</strong> 
+                  <span class="booking-type" [class.helpdesk-booking]="appointment.helpDeskId">
+                    {{ appointment.bookedBy }}
+                  </span>
+                </p>
+                <p *ngIf="appointment.helpDeskId"><strong>Helpdesk ID:</strong> {{ appointment.helpDeskId }}</p>
+                <p><strong>Reminder Sent:</strong> 
+                  <span [class]="appointment.isReminderSent ? 'status-sent' : 'status-pending'">
+                    {{ appointment.isReminderSent ? 'Yes' : 'No' }}
+                  </span>
+                </p>
+              </div>
+            </div>
+            
+            <!-- Payment Information -->
+            <div *ngIf="appointment.payments && appointment.payments.length > 0" class="appointment-payments">
+              <h5>Payment Information</h5>
+              <div *ngFor="let payment of appointment.payments" class="payment-item">
+                <p><strong>Amount:</strong> ₹{{ payment.amount }}</p>
+                <p><strong>Status:</strong> {{ payment.status }}</p>
+                <p><strong>Method:</strong> {{ payment.method }}</p>
+              </div>
+            </div>
+            
+            <!-- Medical Files -->
+            <div *ngIf="appointment.fileName" class="appointment-files">
+              <h5>Medical Files</h5>
+              <div class="file-item">
+                <i class="fas fa-file-pdf text-danger me-2"></i>
+                <span class="file-name">{{ appointment.fileName }}</span>
+                <span class="file-type">({{ appointment.mimeType }})</span>
+                <button class="download-btn" *ngIf="appointment.filePath" 
+                        (click)="downloadFile(appointment.filePath, appointment.fileName)">
+                  <i class="fas fa-download"></i> Download
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div *ngIf="todaysAppointments.length === 0 && !isLoading" class="no-appointments">
+          <div class="empty-state">
+            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+            <h3>No Appointments Found</h3>
+            <div class="helpful-info">
+              <p><strong>This could mean:</strong></p>
+              <ul class="info-list">
+                <li>📅 No appointments are scheduled for today</li>
+                <li>🔧 Appointment APIs are not available in your backend</li>
+              </ul>
+              
+              <div class="alternative-actions">
+                <p><strong>💡 You can still:</strong></p>
+                <ul class="action-list">
+                  <li>✅ Create payments using the <strong>Payments</strong> tab</li>
+                  <li>✅ Enter appointment IDs manually (use: 1, 2, 3, 4, 5)</li>
+                  <li>✅ View existing payment history</li>
+                </ul>
+              </div>
+              
+              <div class="button-group">
+                <button class="refresh-btn secondary" (click)="loadTodaysAppointments()">
+                  <i class="fas fa-sync-alt"></i> Try Again
+                </button>
+                <button class="refresh-btn primary" (click)="setActiveTab('payments')">
+                  <i class="fas fa-credit-card"></i> Go to Payments
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="loading-state">
+          <i class="fas fa-spinner fa-spin fa-2x"></i>
+          <p>Loading today's appointments...</p>
+        </div>
+      </div>
+
+      <!-- Payments Tab -->
+      <div *ngIf="activeTab === 'payments'" class="payments-section">
+        <div class="section-header">
+          <div class="header-left">
+            <h3>Payment Management</h3>
+            <p class="section-subtitle">Manage and track all patient payments</p>
+          </div>
+          <div class="header-right">
+            <button class="btn btn-primary" (click)="showCreatePaymentForm()">
+              <i class="fas fa-plus"></i> Add New Payment
+            </button>
+          </div>
+        </div>
+
+       
+
+        <!-- Payment List -->
+        <div *ngIf="allPayments.length > 0" class="payment-history">
+          <h4>All Payments ({{ allPayments.length }})</h4>
+          <div class="table-container">
+            <table class="payment-table">
+              <thead>
+                <tr>
+                  <th>Payment ID</th>
+                  <th>Patient ID</th>
+                  <th>Doctor ID</th>
+                  <th>Appointment ID</th>
+                  <th>Total Amount</th>
+                  <th>Paid Amount</th>
+                  <th>Remaining Amount</th>
+                  <th>Payment Method</th>
+                  <th>Payment Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let payment of allPayments; trackBy: trackByPaymentId">
+                  <td>{{ payment.paymentId }}</td>
+                  <td>{{ payment.patientId }}</td>
+                  <td>{{ payment.doctorId }}</td>
+                  <td>{{ payment.appointmentId }}</td>
+                  <td>₹{{ payment.totalAmount }}</td>
+                  <td>₹{{ payment.paidAmount }}</td>
+                  <td>₹{{ payment.pendingAmount }}</td>
+                  <td>
+                    <span class="payment-method-badge" [class.cash]="payment.paymentMethod?.toLowerCase() === 'cash'" 
+                                                        [class.card]="payment.paymentMethod?.toLowerCase() === 'card'"
+                                                        [class.upi]="payment.paymentMethod?.toLowerCase() === 'upi'">
+                      {{ payment.paymentMethod }}
+                    </span>
+                  </td>
+                  <td>{{ formatPaymentDate(payment.paymentDate || '') }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="allPayments.length === 0" class="empty-payments">
+          <i class="fas fa-credit-card"></i>
+          <h4>No Payments Found</h4>
+          <p>No payment records are available. Create your first payment using the "Add New Payment" button above.</p>
+        </div>
+
+        <!-- Payment Creation Form -->
+        <div *ngIf="showPaymentForm" class="payment-form-modal">
+          <div class="modal-overlay" (click)="hideCreatePaymentForm()"></div>
+          <div class="modal-content">
+            <div class="modal-body">
+              <!-- Success/Error Messages -->
+             
+              <div class="form-card">
+                <div class="form-header">
+                  <h4><i class="fas fa-credit-card me-2"></i>Create New Payment</h4>
+                  <button class="close-btn" (click)="hideCreatePaymentForm()">×</button>
+                </div>
+                
+                <div class="form-body">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="appointmentId">Appointment ID *</label>
+                      <input type="number" 
+                             id="appointmentId"
+                             [(ngModel)]="paymentCreationForm.appointmentId"
+                             (blur)="markFieldAsTouched('appointmentId')"
+                             placeholder="Enter the appointment ID"
+                             class="form-input"
+                             min="1"
+                             required>
+                      <small class="text-muted">Enter the appointment ID if you know it (use existing appointment IDs: 1, 2, 3, 4, 5...)</small>
+                      
+                      <div *ngIf="shouldShowFieldError('appointmentId') && paymentCreationForm.appointmentId <= 0" class="validation-error">
+                        Please enter a valid appointment ID (positive number)
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="patientId">Patient ID *</label>
+                      <input type="number" 
+                             id="patientId"
+                             [(ngModel)]="paymentCreationForm.patientId"
+                             (blur)="markFieldAsTouched('patientId')"
+                             placeholder="Enter patient ID"
+                             class="form-input"
+                             min="1"
+                             required>
+                      <small class="text-muted">Enter the existing patient ID (must be positive)</small>
+                      <div *ngIf="shouldShowFieldError('patientId') && paymentCreationForm.patientId <= 0 && paymentCreationForm.patientId !== 0" class="validation-error">
+                        Patient ID must be a positive number
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="doctorId">Doctor ID *</label>
+                      <input type="number" 
+                             id="doctorId"
+                             [(ngModel)]="paymentCreationForm.doctorId"
+                             (blur)="markFieldAsTouched('doctorId')"
+                             placeholder="Enter doctor ID"
+                             class="form-input"
+                             min="1"
+                             required>
+                      <small class="text-muted">Enter the existing doctor ID (must be positive)</small>
+                      <div *ngIf="shouldShowFieldError('doctorId') && paymentCreationForm.doctorId <= 0 && paymentCreationForm.doctorId !== 0" class="validation-error">
+                        Doctor ID must be a positive number
+                      </div>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="totalAmount">Total Amount *</label>
+                      <input type="number" 
+                             id="totalAmount"
+                             [(ngModel)]="paymentCreationForm.totalAmount"
+                             (blur)="markFieldAsTouched('totalAmount')"
+                             placeholder="Enter total amount"
+                             step="0.01"
+                             min="0.01"
+                             class="form-input"
+                             required>
+                      <small class="text-muted">Total bill amount (must be greater than 0)</small>
+                      <div *ngIf="shouldShowFieldError('totalAmount') && paymentCreationForm.totalAmount <= 0 && paymentCreationForm.totalAmount !== 0" class="validation-error">
+                        Total amount must be greater than 0
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="paidAmount">Paid Amount *</label>
+                      <input type="number" 
+                             id="paidAmount"
+                             [(ngModel)]="paymentCreationForm.paidAmount"
+                             (blur)="markFieldAsTouched('paidAmount')"
+                             placeholder="Enter paid amount"
+                             step="0.01"
+                             min="0"
+                             [max]="paymentCreationForm.totalAmount || 999999"
+                             class="form-input"
+                             required>
+                      <small class="text-muted">Amount actually paid (cannot exceed total amount)</small>
+                      <div *ngIf="shouldShowFieldError('paidAmount') && paymentCreationForm.paidAmount < 0" class="validation-error">
+                        Paid amount cannot be negative
+                      </div>
+                      <div *ngIf="shouldShowFieldError('paidAmount') && paymentCreationForm.paidAmount > paymentCreationForm.totalAmount && paymentCreationForm.totalAmount > 0" class="validation-error">
+                        Paid amount cannot exceed total amount (₹{{paymentCreationForm.totalAmount}})
+                      </div>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="paymentMethod">Payment Method *</label>
+                      <select id="paymentMethod"
+                              [(ngModel)]="paymentCreationForm.paymentMethod"
+                              (blur)="markFieldAsTouched('paymentMethod')"
+                              class="form-input"
+                              required>
+                        <option value="">Select payment method</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Card">Card</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Net Banking">Net Banking</option>
+                        <option value="Cheque">Cheque</option>
+                      </select>
+                      <small class="text-muted">Choose the payment method used</small>
+                      <div *ngIf="shouldShowFieldError('paymentMethod') && !paymentCreationForm.paymentMethod" class="validation-error">
+                        Payment method is required
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-actions">
+                    <button class="btn-secondary" (click)="hideCreatePaymentForm()">Cancel</button>
+                    <button class="btn-primary" 
+                            (click)="createPayment()"
+                            [disabled]="isCreatingPayment || isPaymentFormInvalid()">
+                      <span *ngIf="isCreatingPayment">
+                        <i class="fas fa-spinner fa-spin me-2"></i>Creating...
+                      </span>
+                      <span *ngIf="!isCreatingPayment">
+                        <i class="fas fa-plus me-2"></i>Create Payment
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

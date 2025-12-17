@@ -1,0 +1,563 @@
+<div class="registration-container">
+  <!-- Registration Card -->
+  <div class="container-fluid h-100">
+    <div class="row h-100 justify-content-center align-items-center">
+      <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+        <div class="card shadow-lg border-0 rounded-4 registration-card" [class.loading-state]="isLoading">
+          
+          <!-- Card Header -->
+          <div class="card-header text-center py-4">
+            <img src="/images/Prescripto.png" alt="Prescripto" class="logo mb-3">
+            <h2 class="card-title text-dark mb-2 fw-bold">{{ getTitle() }}</h2>
+            <p class="text-muted">{{ getSubtitle() }}</p>
+            
+            <!-- Back to Home Button -->
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary btn-sm" 
+              (click)="goToHome()">
+              <i class="fas fa-arrow-left me-2"></i>Back to Home
+            </button>
+          </div>
+
+          <!-- Registration Form -->
+          <div class="card-body px-5 py-4">
+            <form 
+              [formGroup]="registrationForm" 
+              class="registration-form" 
+              [class.form-submitting]="isLoading" 
+              (ngSubmit)="submitForm()" 
+              novalidate>
+
+              <!-- Role Selection (for direct access without query params) -->
+              <div class="mb-4" *ngIf="!isJobCareerFlow">
+                <label class="form-label fw-semibold">Account Type <span class="text-danger">*</span></label>
+                <select class="form-select form-select-lg" [(ngModel)]="selectedRole" (ngModelChange)="onRoleChange()" [ngModelOptions]="{standalone: true}">
+                  <option value="Patient">Patient</option>
+                  <option value="Doctor">Doctor</option>
+                  <option value="HelpDesk">Help Desk</option>
+                </select>
+              </div>
+
+              <!-- Role Selection (only for job career flow) -->
+              <div class="mb-4" *ngIf="isJobCareerFlow">
+                <div class="alert alert-info d-flex align-items-center">
+                  <i class="fas fa-briefcase me-3"></i>
+                  <div>
+                    <strong>Registering as: {{ selectedRole }}</strong>
+                    <br><small>Join our team of healthcare professionals</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Patient Registration Info (for regular flow) -->
+              <div class="mb-4" *ngIf="!isJobCareerFlow">
+                <div class="alert alert-primary d-flex align-items-center">
+                  <i class="fas fa-user-plus me-3"></i>
+                  <div>
+                    <strong>Creating Patient Account</strong>
+                    <br><small>Register to book appointments and manage your healthcare</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Error Message -->
+              <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center mb-4">
+                <i class="fas fa-exclamation-triangle me-3"></i>
+                <span>{{ errorMessage }}</span>
+              </div>
+
+              <!-- Common Fields -->
+              <div class="row">
+                <div class="col-12 mb-4">
+                  <label for="userName" class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                  <input 
+                    type="text" 
+                    id="userName" 
+                    class="form-control form-control-lg" 
+                    formControlName="userName"
+                    placeholder="Enter your full name" 
+                    [class.is-invalid]="isFieldInvalid('userName')">
+                  <div *ngIf="isFieldInvalid('userName')" class="invalid-feedback">
+                    {{ getFieldError('userName') }}
+                  </div>
+                </div>
+                <div class="col-12 mb-4">
+                  <label for="email" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                  <input 
+                    type="email" 
+                    id="email" 
+                    class="form-control form-control-lg" 
+                    formControlName="email"
+                    placeholder="Enter your email" 
+                    [class.is-invalid]="isFieldInvalid('email')">
+                  <div *ngIf="isFieldInvalid('email')" class="invalid-feedback">
+                    {{ getFieldError('email') }}
+                  </div>
+                </div>
+                <div class="col-12 mb-4">
+                  <label for="phoneNumber" class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                  <input 
+                    type="tel" 
+                    id="phoneNumber" 
+                    class="form-control form-control-lg" 
+                    formControlName="phoneNumber"
+                    placeholder="Enter your phone number" 
+                    [class.is-invalid]="isFieldInvalid('phoneNumber')">
+                  <div *ngIf="isFieldInvalid('phoneNumber')" class="invalid-feedback">
+                    {{ getFieldError('phoneNumber') }}
+                  </div>
+                </div>
+                <div class="col-12 mb-4">
+                  <label for="password" class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <input 
+                      [type]="showPassword ? 'text' : 'password'" 
+                      id="password" 
+                      class="form-control form-control-lg" 
+                      formControlName="passwordHash"
+                      placeholder="Create password" 
+                      [class.is-invalid]="isFieldInvalid('passwordHash')">
+                    <button 
+                      type="button" 
+                      class="btn btn-outline-secondary" 
+                      (click)="togglePasswordVisibility()">
+                      <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                    </button>
+                  </div>
+                  <div *ngIf="isFieldInvalid('passwordHash')" class="invalid-feedback">
+                    {{ getFieldError('passwordHash') }}
+                  </div>
+                </div>
+                <div class="col-12 mb-4">
+                  <label for="confirmPassword" class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <input 
+                      [type]="showConfirmPassword ? 'text' : 'password'" 
+                      id="confirmPassword" 
+                      class="form-control form-control-lg" 
+                      formControlName="confirmPassword"
+                      placeholder="Confirm password" 
+                      [class.is-invalid]="isFieldInvalid('confirmPassword') || isPasswordMismatch()">
+                    <button 
+                      type="button" 
+                      class="btn btn-outline-secondary" 
+                      (click)="toggleConfirmPasswordVisibility()">
+                      <i [class]="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                    </button>
+                  </div>
+                  <div *ngIf="isFieldInvalid('confirmPassword')" class="invalid-feedback">
+                    {{ getFieldError('confirmPassword') }}
+                  </div>
+                  <div *ngIf="isPasswordMismatch()" class="invalid-feedback">
+                    Passwords do not match
+                  </div>
+                </div>
+              </div>
+
+              <!-- Doctor Specific Fields -->
+              <div *ngIf="selectedRole === 'Doctor'" class="doctor-specific-section">
+                <div class="doctor-header mb-4">
+                  <h5 class="section-title text-primary mb-3">
+                    <i class="fas fa-user-md text-primary me-2"></i>Medical Professional Information
+                  </h5>
+                  <div class="alert alert-primary border-primary bg-light">
+                    <i class="fas fa-stethoscope me-2"></i>
+                    Please provide your professional medical credentials
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-4">
+                    <label for="specialization" class="form-label fw-semibold">Specialization <span class="text-danger">*</span></label>
+                    <select 
+                      id="specialization" 
+                      class="form-select form-select-lg border-primary" 
+                      formControlName="specialization"
+                      [class.is-invalid]="isFieldInvalid('specialization')">
+                      <option value="">Select Specialization</option>
+                      <option *ngFor="let spec of specializationOptions" [value]="spec.value">{{ spec.display }}</option>
+                    </select>
+                    <div *ngIf="isFieldInvalid('specialization')" class="invalid-feedback">
+                      {{ getFieldError('specialization') }}
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-4">
+                    <label for="qualification" class="form-label fw-semibold">Medical Qualification <span class="text-danger">*</span></label>
+                    <input 
+                      type="text" 
+                      id="qualification" 
+                      class="form-control form-control-lg border-primary" 
+                      formControlName="qualification"
+                      placeholder="e.g., MBBS, MD, MS" 
+                      [class.is-invalid]="isFieldInvalid('qualification')">
+                    <div *ngIf="isFieldInvalid('qualification')" class="invalid-feedback">
+                      {{ getFieldError('qualification') }}
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-4">
+                    <label for="experienceYears" class="form-label fw-semibold">Years of Experience <span class="text-danger">*</span></label>
+                    <input 
+                      type="number" 
+                      id="experienceYears" 
+                      class="form-control form-control-lg border-primary" 
+                      formControlName="experienceYears"
+                      placeholder="Enter years of experience" 
+                      min="0" 
+                      max="50" 
+                      [class.is-invalid]="isFieldInvalid('experienceYears')">
+                    <div *ngIf="isFieldInvalid('experienceYears')" class="invalid-feedback">
+                      {{ getFieldError('experienceYears') }}
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-4">
+                    <label for="languages" class="form-label fw-semibold">Languages Spoken</label>
+                    <input 
+                      type="text" 
+                      id="languages" 
+                      class="form-control form-control-lg border-primary" 
+                      formControlName="languages"
+                      placeholder="e.g., English, Hindi, Tamil" 
+                      [class.is-invalid]="isFieldInvalid('languages')">
+                    <div *ngIf="isFieldInvalid('languages')" class="invalid-feedback">
+                      {{ getFieldError('languages') }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Personal Information for Doctor -->
+                <h6 class="section-subtitle text-primary mb-3">
+                  <i class="fas fa-user text-primary me-2"></i>Personal Information
+                </h6>
+                <div class="row">
+                  <div class="col-md-6 mb-4">
+                    <label for="doctorDob" class="form-label fw-semibold">Date of Birth <span class="text-danger">*</span></label>
+                    <input 
+                      type="date" 
+                      id="doctorDob" 
+                      class="form-control form-control-lg border-primary" 
+                      formControlName="dateOfBirth"
+                      [class.is-invalid]="isFieldInvalid('dateOfBirth')">
+                    <div *ngIf="isFieldInvalid('dateOfBirth')" class="invalid-feedback">
+                      {{ getFieldError('dateOfBirth') }}
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-4">
+                    <label for="doctorGender" class="form-label fw-semibold">Gender <span class="text-danger">*</span></label>
+                    <select 
+                      id="doctorGender" 
+                      class="form-select form-select-lg border-primary" 
+                      formControlName="gender"
+                      [class.is-invalid]="isFieldInvalid('gender')">
+                      <option value="">Select Gender</option>
+                      <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
+                    </select>
+                    <div *ngIf="isFieldInvalid('gender')" class="invalid-feedback">
+                      {{ getFieldError('gender') }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Emergency Contact for Doctor -->
+                <h6 class="section-subtitle text-primary mb-3">
+                  <i class="fas fa-phone text-primary me-2"></i>Emergency Contact
+                </h6>
+                <div class="row">
+                  <div class="col-md-4 mb-4">
+                    <label for="doctorEmergencyName" class="form-label fw-semibold">Contact Name <span class="text-danger">*</span></label>
+                    <input 
+                      type="text" 
+                      id="doctorEmergencyName" 
+                      class="form-control form-control-lg border-primary" 
+                      formControlName="emergencyContactName"
+                      placeholder="Emergency contact name" 
+                      [class.is-invalid]="isFieldInvalid('emergencyContactName')">
+                    <div *ngIf="isFieldInvalid('emergencyContactName')" class="invalid-feedback">
+                      {{ getFieldError('emergencyContactName') }}
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-4">
+                    <label for="doctorEmergencyPhone" class="form-label fw-semibold">Contact Phone <span class="text-danger">*</span></label>
+                    <input 
+                      type="tel" 
+                      id="doctorEmergencyPhone" 
+                      class="form-control form-control-lg border-primary" 
+                      formControlName="emergencyContactPhoneNumber"
+                      placeholder="Emergency contact phone" 
+                      [class.is-invalid]="isFieldInvalid('emergencyContactPhoneNumber')">
+                    <div *ngIf="isFieldInvalid('emergencyContactPhoneNumber')" class="invalid-feedback">
+                      {{ getFieldError('emergencyContactPhoneNumber') }}
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-4">
+                    <label for="doctorEmergencyRelation" class="form-label fw-semibold">Relationship <span class="text-danger">*</span></label>
+                    <select 
+                      id="doctorEmergencyRelation" 
+                      class="form-select form-select-lg border-primary" 
+                      formControlName="emergencyContactRelationship"
+                      [class.is-invalid]="isFieldInvalid('emergencyContactRelationship')">
+                      <option value="">Select Relationship</option>
+                      <option *ngFor="let rel of relationships" [value]="rel">{{ rel }}</option>
+                    </select>
+                    <div *ngIf="isFieldInvalid('emergencyContactRelationship')" class="invalid-feedback">
+                      {{ getFieldError('emergencyContactRelationship') }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- HelpDesk Specific Fields -->
+              <div *ngIf="selectedRole === 'HelpDesk'" class="helpdesk-specific-section">
+                <div class="helpdesk-header mb-4">
+                  <h5 class="section-title text-success mb-3">
+                    <i class="fas fa-headset text-success me-2"></i>Support Professional Information
+                  </h5>
+                  <div class="alert alert-success border-success bg-light">
+                    <i class="fas fa-life-ring me-2"></i>
+                    Join our support team to help patients with their healthcare needs
+                  </div>
+                </div>
+
+                <!-- Personal Information for HelpDesk -->
+                <h6 class="section-subtitle text-success mb-3">
+                  <i class="fas fa-user text-success me-2"></i>Personal Information
+                </h6>
+                <div class="row">
+                  <div class="col-md-6 mb-4">
+                    <label for="helpdeskDob" class="form-label fw-semibold">Date of Birth <span class="text-danger">*</span></label>
+                    <input 
+                      type="date" 
+                      id="helpdeskDob" 
+                      class="form-control form-control-lg border-success" 
+                      formControlName="dateOfBirth"
+                      [class.is-invalid]="isFieldInvalid('dateOfBirth')">
+                    <div *ngIf="isFieldInvalid('dateOfBirth')" class="invalid-feedback">
+                      {{ getFieldError('dateOfBirth') }}
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-4">
+                    <label for="helpdeskGender" class="form-label fw-semibold">Gender <span class="text-danger">*</span></label>
+                    <select 
+                      id="helpdeskGender" 
+                      class="form-select form-select-lg border-success" 
+                      formControlName="gender"
+                      [class.is-invalid]="isFieldInvalid('gender')">
+                      <option value="">Select Gender</option>
+                      <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
+                    </select>
+                    <div *ngIf="isFieldInvalid('gender')" class="invalid-feedback">
+                      {{ getFieldError('gender') }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Emergency Contact for HelpDesk -->
+                <h6 class="section-subtitle text-success mb-3">
+                  <i class="fas fa-phone text-success me-2"></i>Emergency Contact
+                </h6>
+                <div class="row">
+                  <div class="col-md-8 mb-4">
+                    <label for="helpdeskEmergencyName" class="form-label fw-semibold">Contact Name <span class="text-danger">*</span></label>
+                    <input 
+                      type="text" 
+                      id="helpdeskEmergencyName" 
+                      class="form-control form-control-lg border-success" 
+                      formControlName="emergencyContactName"
+                      placeholder="Emergency contact name" 
+                      [class.is-invalid]="isFieldInvalid('emergencyContactName')">
+                    <div *ngIf="isFieldInvalid('emergencyContactName')" class="invalid-feedback">
+                      {{ getFieldError('emergencyContactName') }}
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-4">
+                    <label for="helpdeskEmergencyPhone" class="form-label fw-semibold">Contact Phone <span class="text-danger">*</span></label>
+                    <input 
+                      type="tel" 
+                      id="helpdeskEmergencyPhone" 
+                      class="form-control form-control-lg border-success" 
+                      formControlName="emergencyContactPhoneNumber"
+                      placeholder="Emergency contact phone" 
+                      [class.is-invalid]="isFieldInvalid('emergencyContactPhoneNumber')">
+                    <div *ngIf="isFieldInvalid('emergencyContactPhoneNumber')" class="invalid-feedback">
+                      {{ getFieldError('emergencyContactPhoneNumber') }}
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-4">
+                    <label for="helpdeskEmergencyRelationship" class="form-label fw-semibold">Relationship <span class="text-danger">*</span></label>
+                    <select 
+                      id="helpdeskEmergencyRelationship" 
+                      class="form-select form-select-lg border-success" 
+                      formControlName="emergencyContactRelationship"
+                      [class.is-invalid]="isFieldInvalid('emergencyContactRelationship')">
+                      <option value="">Select Relationship</option>
+                      <option *ngFor="let rel of relationships" [value]="rel">{{ rel }}</option>
+                    </select>
+                    <div *ngIf="isFieldInvalid('emergencyContactRelationship')" class="invalid-feedback">
+                      {{ getFieldError('emergencyContactRelationship') }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Professional Information for HelpDesk -->
+                <h6 class="section-subtitle text-success mb-3">
+                  <i class="fas fa-graduation-cap text-success me-2"></i>Professional Information
+                </h6>
+                <div class="row">
+                  <div class="col-md-6 mb-4">
+                    <label for="helpdeskQualification" class="form-label fw-semibold">Educational Qualification <span class="text-danger">*</span></label>
+                    <input 
+                      type="text" 
+                      id="helpdeskQualification" 
+                      class="form-control form-control-lg border-success" 
+                      formControlName="qualification"
+                      placeholder="e.g., High School, Bachelor's Degree, Diploma" 
+                      [class.is-invalid]="isFieldInvalid('qualification')">
+                    <div *ngIf="isFieldInvalid('qualification')" class="invalid-feedback">
+                      {{ getFieldError('qualification') }}
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-4">
+                    <label for="helpdeskLanguages" class="form-label fw-semibold">Languages Known</label>
+                    <input 
+                      type="text" 
+                      id="helpdeskLanguages" 
+                      class="form-control form-control-lg border-success" 
+                      formControlName="languages"
+                      placeholder="e.g., English, Hindi, Spanish" 
+                      [class.is-invalid]="isFieldInvalid('languages')">
+                    <div *ngIf="isFieldInvalid('languages')" class="invalid-feedback">
+                      {{ getFieldError('languages') }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Patient Specific Fields -->
+              <div *ngIf="selectedRole === 'Patient'" class="patient-specific-section">
+                <h5 class="section-title mb-3">
+                  <i class="fas fa-user text-info me-2"></i>Personal Information
+                </h5>
+                <div class="row">
+                  <div class="col-md-6 mb-4">
+                    <label for="dateOfBirth" class="form-label fw-semibold">Date of Birth <span class="text-danger">*</span></label>
+                    <input 
+                      type="date" 
+                      id="dateOfBirth" 
+                      class="form-control form-control-lg" 
+                      formControlName="dateOfBirth"
+                      [class.is-invalid]="isFieldInvalid('dateOfBirth')">
+                    <div *ngIf="isFieldInvalid('dateOfBirth')" class="invalid-feedback">
+                      {{ getFieldError('dateOfBirth') }}
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-4">
+                    <label for="gender" class="form-label fw-semibold">Gender <span class="text-danger">*</span></label>
+                    <select 
+                      id="gender" 
+                      class="form-select form-select-lg" 
+                      formControlName="gender"
+                      [class.is-invalid]="isFieldInvalid('gender')">
+                      <option value="">Select Gender</option>
+                      <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
+                    </select>
+                    <div *ngIf="isFieldInvalid('gender')" class="invalid-feedback">
+                      {{ getFieldError('gender') }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Emergency Contact Section -->
+                <h6 class="section-subtitle mb-3">
+                  <i class="fas fa-phone text-danger me-2"></i>Emergency Contact
+                </h6>
+                <div class="row">
+                  <div class="col-md-4 mb-4">
+                    <label for="emergencyContactName" class="form-label fw-semibold">Contact Name <span class="text-danger">*</span></label>
+                    <input 
+                      type="text" 
+                      id="emergencyContactName" 
+                      class="form-control form-control-lg" 
+                      formControlName="emergencyContactName"
+                      placeholder="Emergency contact name" 
+                      [class.is-invalid]="isFieldInvalid('emergencyContactName')">
+                    <div *ngIf="isFieldInvalid('emergencyContactName')" class="invalid-feedback">
+                      {{ getFieldError('emergencyContactName') }}
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-4">
+                    <label for="emergencyContactPhone" class="form-label fw-semibold">Contact Phone <span class="text-danger">*</span></label>
+                    <input 
+                      type="tel" 
+                      id="emergencyContactPhone" 
+                      class="form-control form-control-lg" 
+                      formControlName="emergencyContactPhoneNumber"
+                      placeholder="Emergency contact phone" 
+                      [class.is-invalid]="isFieldInvalid('emergencyContactPhoneNumber')">
+                    <div *ngIf="isFieldInvalid('emergencyContactPhoneNumber')" class="invalid-feedback">
+                      {{ getFieldError('emergencyContactPhoneNumber') }}
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-4">
+                    <label for="emergencyContactRelationship" class="form-label fw-semibold">Relationship <span class="text-danger">*</span></label>
+                    <select 
+                      id="emergencyContactRelationship" 
+                      class="form-select form-select-lg" 
+                      formControlName="emergencyContactRelationship"
+                      [class.is-invalid]="isFieldInvalid('emergencyContactRelationship')">
+                      <option value="">Select Relationship</option>
+                      <option *ngFor="let rel of relationships" [value]="rel">{{ rel }}</option>
+                    </select>
+                    <div *ngIf="isFieldInvalid('emergencyContactRelationship')" class="invalid-feedback">
+                      {{ getFieldError('emergencyContactRelationship') }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="d-grid gap-2 mt-4">
+                <button 
+                  type="button" 
+                  class="btn btn-outline-secondary btn-lg w-100 rounded-pill" 
+                  (click)="goToLogin()">
+                  <i class="fas fa-sign-in-alt me-2"></i>Already have an account? Login
+                </button>
+                
+                <!-- Submit Button -->
+                <div class="col-12">
+                  <button 
+                    type="submit" 
+                    class="btn btn-success btn-lg w-100 py-3 fw-bold text-uppercase"
+                    [disabled]="!canSubmitForm">
+                    <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                    {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+                  </button>
+                  
+                  <!-- Debug button for development (remove in production) -->
+                  <button 
+                    type="button" 
+                    class="btn btn-outline-info btn-sm mt-2 w-100"
+                    (click)="debugFormValidity()">
+                    🔍 Debug Form Validation
+                  </button>
+                  
+                  <div *ngIf="!registrationForm.valid" class="mt-2">
+                    <small class="text-muted">
+                      <strong>Form Status:</strong> {{ registrationForm.valid ? 'Valid ✅' : 'Invalid ❌' }}<br>
+                      <strong>Required for HelpDesk:</strong> Name, Email, Phone, Password, Date of Birth, Gender, Emergency Contact, Qualification<br>
+                      <strong>Invalid Fields:</strong>
+                      <span *ngFor="let control of getInvalidControls(); let last = last">
+                        {{ control }}{{ !last ? ', ' : '' }}
+                      </span>
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

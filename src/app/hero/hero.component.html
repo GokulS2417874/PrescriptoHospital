@@ -1,0 +1,151 @@
+<div class="hero-container">
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1>Book Appointment<br>With Trusted Doctors</h1>
+            <div class="hero-features">
+                <div class="feature-item">
+                    <img src="/images/HomePage Pic/Book Appointment.png" alt="Doctors">
+                    <p>Simply browse through our extensive list of trusted doctors, schedule your appointment hassle-free.</p>
+                </div>
+            </div>
+            <button class="cta-button" (click)="navigateTo('doctors')">
+                Book appointment
+                <span class="arrow">→</span>
+            </button>
+        </div>
+        <div class="hero-image">
+            <img src="/images/HomePage Pic/home_page.png" alt="Doctor">
+        </div>
+    </div>
+    
+    <!-- Specialties Section -->
+    <div class="specialties-section">
+        <h2>Find by Speciality</h2>
+        <p>Simply browse through our extensive list of trusted doctors, schedule your appointment hassle-free.</p>
+        <div class="specialties-grid">
+            <div class="specialty-card" (click)="navigateTo('doctors')">
+                <img src="/images/HomePage Pic/General physician.png" alt="General physician">
+                <span>General physician</span>
+            </div>
+            <div class="specialty-card" (click)="navigateTo('doctors')">
+                <img src="/images/HomePage Pic/Gynecologist.png" alt="Gynecologist">
+                <span>Gynecologist</span>
+            </div>
+            <div class="specialty-card" (click)="navigateTo('doctors')">
+                <img src="/images/HomePage Pic/Dermatologist.png" alt="Dermatologist">
+                <span>Dermatologist</span>
+            </div>
+            <div class="specialty-card" (click)="navigateTo('doctors')">
+                <img src="/images/HomePage Pic/Pediatricians.png" alt="Pediatricians">
+                <span>Pediatricians</span>
+            </div>
+            <div class="specialty-card" (click)="navigateTo('doctors')">
+                <img src="/images/HomePage Pic/Neurologist.png" alt="Neurologist">
+                <span>Neurologist</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Doctors Section - Now using real doctors data -->
+    <div class="top-doctors-section">
+        <h2>Top Doctors to Book</h2>
+        <p>Simply browse through our extensive list of trusted doctors.</p>
+        
+        <!-- Top Doctors Simple Cards -->
+        <div class="doctors-preview" *ngIf="!isLoadingDoctors && topDoctors.length > 0">
+            <div class="simple-doctor-card" *ngFor="let doctor of topDoctors; let i = index" (click)="navigateToDoctor(doctor.userId)">
+                <!-- Doctor Image -->
+                <div class="simple-doctor-image">
+                    <img *ngIf="doctor.avatar && !isImageBroken(doctor.avatar)" 
+                         [src]="doctor.avatar" 
+                         [alt]="doctor.userName" 
+                         (error)="markImageAsBroken(doctor.avatar || '')">
+                    <div *ngIf="!doctor.avatar || isImageBroken(doctor.avatar)" 
+                         class="simple-doctor-placeholder">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                </div>
+
+                <!-- Availability Status -->
+                <div class="simple-availability">
+                    <span class="status-dot" [class.available]="doctor.active_Status === true"></span>
+                    <span class="status-text">{{ doctor.active_Status === true ? 'Available' : 'Unavailable' }}</span>
+                </div>
+
+                <!-- Doctor Info -->
+                <div class="simple-doctor-info">
+                    <h4 class="simple-doctor-name">Dr. {{ doctor.userName }}</h4>
+                    <p class="simple-doctor-specialty">{{ doctor.specialization }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading state -->
+        <div *ngIf="isLoadingDoctors" class="loading-state">
+            <div class="text-center py-5">
+                <i class="fas fa-spinner fa-spin fa-2x text-primary mb-3"></i>
+                <p>Loading top doctors...</p>
+            </div>
+        </div>
+        
+        <!-- Empty state -->
+        <div *ngIf="!isLoadingDoctors && topDoctors.length === 0" class="empty-state">
+            <div class="text-center py-5">
+                <i class="fas fa-user-md fa-3x text-muted mb-3"></i>
+                <h4>No doctors available</h4>
+                <p class="text-muted">Please try again later.</p>
+            </div>
+        </div>
+        
+        <button class="more-button" (click)="navigateTo('doctors')">View All Doctors</button>
+    </div>
+</div>
+
+<!-- WHY CHOOSE US Section -->
+<div class="why-choose-us-section">
+    <div class="hero-container">
+        <div class="why-choose-content">
+            <!-- Left side - Image -->
+            <div class="why-choose-image">
+                <img src="/images/HomePage Pic/home_page.png" alt="Medical Team" class="team-image">
+            </div>
+            
+            <!-- Right side - Content -->
+            <div class="why-choose-text">
+                <div class="intro-text">
+                    <p>
+                        At Prescripto, we understand that your health is your most valuable asset. That's why we've created a comprehensive platform that connects you with trusted healthcare professionals, making it easier than ever to prioritize your wellbeing. Whether you're seeking ongoing care, Prescripto is here to support you every step of the way.
+                    </p>
+                </div>
+                
+                <div class="our-vision">
+                    <h3>Our Vision</h3>
+                    <p>
+                        Our vision at Prescripto is to create a seamless healthcare experience for every user. We aim to bridge the gap between patients and healthcare providers, making it easier for you to access the care you need, when you need it.
+                    </p>
+                </div>
+                
+                <div class="why-choose-grid">
+                    <h2>WHY CHOOSE US</h2>
+                    
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <h4>EFFICIENCY:</h4>
+                            <p>Streamlined appointment scheduling that fits into your busy lifestyle.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4>CONVENIENCE:</h4>
+                            <p>Access to a network of trusted healthcare professionals in your area.</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4>PERSONALIZATION:</h4>
+                            <p>Tailored recommendations and reminders to help you stay on top of your health.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

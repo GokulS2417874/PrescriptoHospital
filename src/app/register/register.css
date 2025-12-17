@@ -1,0 +1,636 @@
+/* Registration Container */
+.registration-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 20px 0;
+}
+
+.registration-card {
+  border-radius: 20px;
+  overflow: hidden;
+  animation: slideInUp 0.6s ease-out;
+  position: relative;
+}
+
+.registration-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+}
+
+/* Header Section */
+.registration-header {
+  position: relative;
+}
+
+.registration-icon {
+  animation: fadeInDown 0.8s ease-out 0.2s both;
+}
+
+.registration-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+  animation: logoFloat 3s ease-in-out infinite;
+}
+
+.job-career-badge {
+  animation: bounceIn 0.8s ease-out 0.4s both;
+}
+
+.job-career-badge .badge {
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+}
+
+/* Role Display Card */
+.role-display-card {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
+  border: 2px solid rgba(99, 102, 241, 0.2);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  animation: slideInLeft 0.6s ease-out 0.3s both;
+}
+
+.role-display-content {
+  display: flex;
+  align-items: center;
+}
+
+.role-display-icon {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  margin-right: 15px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.role-display-info {
+  flex: 1;
+}
+
+.role-display-title {
+  margin: 0 0 5px 0;
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.role-display-description {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* Section Titles */
+.section-title {
+  color: #1f2937;
+  font-weight: 700;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(99, 102, 241, 0.1);
+  margin-bottom: 20px !important;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 50px;
+  height: 2px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+}
+
+/* Form Sections */
+.common-fields-section {
+  animation: slideInRight 0.6s ease-out 0.4s both;
+}
+
+.role-specific-fields {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.02));
+  padding: 25px;
+    border-radius: 15px;
+  margin-bottom: 25px;
+  border-left: 4px solid #6366f1;
+  position: relative;
+  overflow: hidden;
+  animation: slideInUp 0.6s ease-out 0.5s both;
+}
+
+.role-specific-fields::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(50%, -50%);
+}
+
+.patient-fields {
+  border-left-color: #10b981;
+}
+
+.doctor-fields {
+  border-left-color: #6366f1;
+}
+
+.helpdesk-fields {
+  border-left-color: #f59e0b;
+}
+
+/* Form Controls */
+  .form-control-lg, .form-select-lg {
+  padding: 15px 18px;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  }
+  
+  .form-control-lg:focus, .form-select-lg:focus {
+    border-color: #6366f1;
+  box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.15);
+  background-color: rgba(255, 255, 255, 0.95);
+  transform: translateY(-2px);
+}
+
+.form-control-lg:hover, .form-select-lg:hover {
+  border-color: #a5b4fc;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+/* Required field indicator */
+.form-label:has(+ input[required])::after,
+.form-label:has(+ select[required])::after {
+  content: ' *';
+  color: #ef4444;
+  font-weight: bold;
+}
+
+/* Action Buttons */
+.action-buttons {
+  animation: fadeInUp 0.6s ease-out 0.6s both;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  font-weight: 700;
+  padding: 15px 30px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #5856eb, #7c3aed);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+.btn-outline-secondary {
+  border: 2px solid #6b7280;
+  color: #6b7280;
+  font-weight: 600;
+  padding: 15px 30px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6b7280;
+  border-color: #6b7280;
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(107, 114, 128, 0.3);
+}
+
+/* Career Note */
+.career-note {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.05));
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 10px;
+  padding: 15px;
+  animation: slideInUp 0.6s ease-out 0.7s both;
+}
+
+/* Login Link */
+.text-primary {
+  color: #6366f1 !important;
+  transition: all 0.3s ease;
+}
+
+.text-primary:hover {
+  color: #5856eb !important;
+  text-decoration: underline !important;
+}
+
+/* Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes logoFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .registration-container {
+    padding: 10px;
+  }
+  
+  .card-body {
+    padding: 30px 20px !important;
+  }
+  
+  .registration-logo {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .role-specific-fields {
+    padding: 20px 15px;
+  }
+  
+  .btn-lg {
+    padding: 12px 24px;
+    font-size: 1rem;
+  }
+  
+  .section-title {
+    font-size: 1.1rem;
+  }
+}
+
+/* Loading State */
+.loading-state {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.loading-state .btn {
+  position: relative;
+}
+
+.loading-state .btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #ffffff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+  }
+
+/* ===== ROLE-SPECIFIC STYLING ===== */
+
+/* Doctor Specific Section - Blue Theme */
+.doctor-specific-section {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(37, 99, 235, 0.02));
+  border-left: 4px solid #3b82f6;
+  border-radius: 12px;
+  padding: 25px;
+  margin: 20px 0;
+  animation: slideInRight 0.6s ease-out;
+}
+
+.doctor-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.doctor-specific-section .section-title {
+  color: #1e40af !important;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.doctor-specific-section .alert-primary {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05)) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  color: #1e40af !important;
+  font-weight: 500;
+}
+
+.doctor-specific-section .border-primary {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 0.1rem rgba(59, 130, 246, 0.15);
+}
+
+.doctor-specific-section .border-primary:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
+}
+
+.doctor-specific-section .text-primary {
+  color: #1e40af !important;
+}
+
+.doctor-specific-section .section-subtitle {
+  color: #1e40af !important;
+  font-weight: 600;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+  padding-bottom: 8px;
+  margin-bottom: 15px !important;
+}
+
+/* HelpDesk Specific Section - Green Theme */
+.helpdesk-specific-section {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), rgba(21, 128, 61, 0.02));
+  border-left: 4px solid #22c55e;
+  border-radius: 12px;
+  padding: 25px;
+  margin: 20px 0;
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.helpdesk-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.helpdesk-specific-section .section-title {
+  color: #15803d !important;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.helpdesk-specific-section .alert-success {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(21, 128, 61, 0.05)) !important;
+  border: 1px solid rgba(34, 197, 94, 0.2) !important;
+  color: #15803d !important;
+  font-weight: 500;
+}
+
+.helpdesk-specific-section .border-success {
+  border-color: #22c55e !important;
+  box-shadow: 0 0 0 0.1rem rgba(34, 197, 94, 0.15);
+}
+
+.helpdesk-specific-section .border-success:focus {
+  border-color: #16a34a !important;
+  box-shadow: 0 0 0 0.2rem rgba(34, 197, 94, 0.25) !important;
+}
+
+.helpdesk-specific-section .text-success {
+  color: #15803d !important;
+}
+
+.helpdesk-specific-section .section-subtitle {
+  color: #15803d !important;
+  font-weight: 600;
+  border-bottom: 2px solid rgba(34, 197, 94, 0.2);
+  padding-bottom: 8px;
+  margin-bottom: 15px !important;
+}
+
+/* Patient Specific Section - Info Theme */
+.patient-specific-section {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(147, 197, 253, 0.02));
+  border-left: 4px solid #60a5fa;
+  border-radius: 12px;
+  padding: 25px;
+  margin: 20px 0;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.patient-specific-section .section-title {
+  color: #1d4ed8 !important;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.patient-specific-section .text-info {
+  color: #1d4ed8 !important;
+}
+
+.patient-specific-section .section-subtitle {
+  color: #dc2626 !important;
+  font-weight: 600;
+  border-bottom: 2px solid rgba(220, 38, 38, 0.2);
+  padding-bottom: 8px;
+  margin-bottom: 15px !important;
+}
+
+/* Enhanced Form Controls for All Sections */
+.doctor-specific-section .form-control,
+.doctor-specific-section .form-select {
+  transition: all 0.3s ease;
+}
+
+.helpdesk-specific-section .form-control,
+.helpdesk-specific-section .form-select {
+  transition: all 0.3s ease;
+}
+
+.patient-specific-section .form-control,
+.patient-specific-section .form-select {
+  transition: all 0.3s ease;
+  border-color: #d1d5db;
+}
+
+.patient-specific-section .form-control:focus,
+.patient-specific-section .form-select:focus {
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 0.2rem rgba(96, 165, 250, 0.25) !important;
+}
+
+/* Section Icons Enhancement */
+.section-title i,
+.section-subtitle i {
+  margin-right: 8px;
+  font-size: 1.1em;
+}
+
+.doctor-specific-section .fa-stethoscope,
+.doctor-specific-section .fa-user-md {
+  color: #3b82f6;
+}
+
+.helpdesk-specific-section .fa-headset,
+.helpdesk-specific-section .fa-life-ring {
+  color: #22c55e;
+}
+
+.patient-specific-section .fa-user {
+  color: #60a5fa;
+}
+
+/* Alert Box Enhancements */
+.alert {
+  border-radius: 10px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.alert i {
+  margin-right: 10px;
+  font-size: 1.2em;
+}
+
+/* Role Selection Enhancement */
+.form-select option[value="Doctor"] {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.form-select option[value="HelpDesk"] {
+  background-color: rgba(34, 197, 94, 0.1);
+}
+
+.form-select option[value="Patient"] {
+  background-color: rgba(96, 165, 250, 0.1);
+}

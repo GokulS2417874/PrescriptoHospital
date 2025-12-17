@@ -1,0 +1,342 @@
+<div class="glassmorphism-login-container">
+  <!-- Full Screen Medical Background with Smooth Fade -->
+  <div class="background-slideshow">
+    <div class="bg-layer-3"></div>
+    <div class="bg-layer-4"></div>
+    <div class="bg-layer-5"></div>
+  </div>
+  
+  <!-- Medical Particles Background -->
+  <div class="medical-particles">
+    <div class="particle" style="--delay: 0s; --x: 10%; --y: 20%; --size: 4px;"></div>
+    <div class="particle" style="--delay: 2s; --x: 80%; --y: 70%; --size: 6px;"></div>
+    <div class="particle" style="--delay: 4s; --x: 25%; --y: 85%; --size: 3px;"></div>
+    <div class="particle" style="--delay: 1s; --x: 70%; --y: 30%; --size: 5px;"></div>
+    <div class="particle" style="--delay: 3s; --x: 50%; --y: 15%; --size: 4px;"></div>
+    <div class="particle" style="--delay: 5s; --x: 15%; --y: 60%; --size: 7px;"></div>
+    <div class="particle" style="--delay: 1.5s; --x: 85%; --y: 45%; --size: 3px;"></div>
+    <div class="particle" style="--delay: 3.5s; --x: 40%; --y: 75%; --size: 5px;"></div>
+  </div>
+
+  <!-- Floating Medical Icons -->
+  <div class="floating-medical-icons">
+    <div class="medical-icon" style="--delay: 0s; --x: 8%; --y: 15%;"><i class="fas fa-heartbeat"></i></div>
+    <div class="medical-icon" style="--delay: 2s; --x: 90%; --y: 25%;"><i class="fas fa-user-md"></i></div>
+    <div class="medical-icon" style="--delay: 4s; --x: 12%; --y: 80%;"><i class="fas fa-stethoscope"></i></div>
+    <div class="medical-icon" style="--delay: 1s; --x: 85%; --y: 75%;"><i class="fas fa-pills"></i></div>
+    <div class="medical-icon" style="--delay: 3s; --x: 50%; --y: 8%;"><i class="fas fa-hospital"></i></div>
+    <div class="medical-icon" style="--delay: 5s; --x: 25%; --y: 12%;"><i class="fas fa-ambulance"></i></div>
+  </div>
+
+  <!-- Desktop Glass Login Card -->
+  <div class="glass-login-card" [class.shake]="shakeForm">
+    <div class="card-content">
+      
+      <!-- LEFT COLUMN: Logo & Welcome -->
+      <div class="left-column">
+        <!-- Logo Section -->
+      <div class="logo-section">
+          <div class="logo-wrapper">
+            <div class="medical-cross-logo">
+              <i class="fas fa-plus"></i>
+              <div class="logo-glow"></div>
+            </div>
+          </div>
+          <h1 class="brand-name">Prescripto Portal</h1>
+          <p class="brand-tagline">Advanced Healthcare Management</p>
+        </div>
+
+        <!-- Welcome Message -->
+        <div class="welcome-message">
+          <h2 class="welcome-title">Welcome Back</h2>
+          <p class="welcome-text">Sign in to access your medical dashboard</p>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Form -->
+      <div class="right-column">
+        <!-- Error Alert -->
+        <div *ngIf="errorMessage" class="modern-alert error-alert" role="alert">
+          <div class="alert-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div class="alert-content">
+            <span>{{ errorMessage }}</span>
+          </div>
+          <button type="button" class="alert-close" (click)="errorMessage = ''" aria-label="Close">
+            <i class="fas fa-times"></i>
+          </button>
+    </div>
+
+    <!-- Login Form -->
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" *ngIf="!showForgotPassword && !showTokenReset" class="modern-form">
+      <!-- Email Field -->
+          <div class="form-field">
+            <label for="email" class="field-label">
+              <i class="fas fa-envelope"></i>
+              <span>Email Address</span>
+            </label>
+            <div class="input-container">
+          <input
+            type="email"
+            id="email"
+                class="glass-input"
+                [class.error]="email?.invalid && email?.touched"
+                [class.success]="email?.valid && email?.touched"
+                formControlName="email"
+                placeholder="doctor@prescripto.com"
+                autocomplete="email">
+              <div class="input-highlight"></div>
+            </div>
+            <div *ngIf="email?.invalid && email?.touched" class="field-error">
+              <i class="fas fa-exclamation-circle"></i>
+              <span *ngIf="email?.errors?.['required']">Email is required</span>
+            <span *ngIf="email?.errors?.['email']">Please enter a valid email</span>
+        </div>
+      </div>
+
+      <!-- Password Field -->
+          <div class="form-field">
+            <label for="password" class="field-label">
+              <i class="fas fa-lock"></i>
+              <span>Password</span>
+            </label>
+            <div class="input-container password-field">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+                class="glass-input"
+                [class.error]="password?.invalid && password?.touched"
+                [class.success]="password?.valid && password?.touched"
+                formControlName="password"
+                placeholder="Enter your secure password"
+                autocomplete="current-password">
+          <button
+            type="button"
+                class="password-reveal"
+            (click)="togglePasswordVisibility()">
+            <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+          </button>
+              <div class="input-highlight"></div>
+            </div>
+            <div *ngIf="password?.invalid && password?.touched" class="field-error">
+              <i class="fas fa-exclamation-circle"></i>
+              <span *ngIf="password?.errors?.['required']">Password is required</span>
+              <span *ngIf="password?.errors?.['minlength']">Minimum 6 characters required</span>
+        </div>
+      </div>
+
+      <!-- Login Button -->
+      <button
+        type="submit"
+            class="glass-button primary-button"
+            [class.hovered]="buttonState === 'hovered'"
+            (mouseenter)="onButtonMouseEnter()"
+            (mouseleave)="onButtonMouseLeave()">
+            <div class="button-background"></div>
+            <span class="button-text" *ngIf="!isFormDisabled">
+              <i class="fas fa-sign-in-alt"></i>
+              <span>Access Portal</span>
+        </span>
+            <span class="button-text" *ngIf="isFormDisabled">
+              <div class="pulse-loader">
+                <i class="fas fa-heartbeat"></i>
+              </div>
+              <span>Authenticating...</span>
+        </span>
+      </button>
+
+          <!-- Forgot Password Link -->
+      <div class="form-footer">
+            <a href="javascript:void(0)" class="glass-link" (click)="showForgotPasswordForm()">
+              <i class="fas fa-key"></i>
+              <span>Forgot your password?</span>
+            </a>
+          </div>
+        </form>
+
+        <!-- Forgot Password Form -->
+        <div *ngIf="showForgotPassword" class="forgot-password-section">
+          <div class="section-header">
+            <div class="reset-icon-wrapper">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <h3 class="section-title">Reset Password</h3>
+            <p class="section-subtitle">Enter your email to receive reset instructions</p>
+          </div>
+
+          <div class="form-field">
+            <label for="forgotEmail" class="field-label">
+              <i class="fas fa-envelope"></i>
+              <span>Email Address</span>
+            </label>
+            <div class="input-container">
+              <input
+                type="email"
+                id="forgotEmail"
+                class="glass-input"
+                [(ngModel)]="forgotPasswordEmail"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="Enter your registered email"
+                autocomplete="email">
+              <div class="input-highlight"></div>
+            </div>
+          </div>
+
+          <!-- Success Message -->
+          <div *ngIf="forgotPasswordMessage" class="modern-alert success-alert" role="alert">
+            <div class="alert-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="alert-content">
+              <span>{{ forgotPasswordMessage }}</span>
+            </div>
+          </div>
+
+          <!-- Reset Button -->
+          <button
+            type="button"
+            class="glass-button secondary-button"
+            [disabled]="isForgotPasswordLoading"
+            (click)="onForgotPasswordSubmit()">
+            <div class="button-background"></div>
+            <span class="button-text" *ngIf="!isForgotPasswordLoading">
+              <i class="fas fa-paper-plane"></i>
+              <span>Send Reset Instructions</span>
+            </span>
+            <span class="button-text" *ngIf="isForgotPasswordLoading">
+              <div class="pulse-loader">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <span>Sending...</span>
+            </span>
+          </button>
+
+          <!-- Back to Login -->
+          <div class="form-footer">
+            <a href="javascript:void(0)" class="glass-link" (click)="hideForgotPasswordForm()">
+              <i class="fas fa-arrow-left"></i>
+              <span>Back to Login</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- TOKEN RESET FORM -->
+        <div *ngIf="showTokenReset" class="token-reset-section">
+          <div class="section-header">
+            <div class="reset-icon-wrapper">
+              <i class="fas fa-key"></i>
+            </div>
+            <h3 class="section-title">{{ isTokenFromUrl ? 'Reset Your Password' : 'Enter Reset Token' }}</h3>
+            <p class="section-subtitle">{{ isTokenFromUrl ? 'Enter your new password below' : 'Check your email for the reset token and enter your new password' }}</p>
+          </div>
+
+          <!-- Reset Token Field - Only show when token is NOT from URL -->
+          <div class="form-field" *ngIf="!isTokenFromUrl">
+            <label for="resetToken" class="field-label">
+              <i class="fas fa-shield-alt"></i>
+              <span>Reset Token</span>
+            </label>
+            <div class="input-container">
+              <input
+                type="text"
+                id="resetToken"
+                class="glass-input"
+                [(ngModel)]="resetToken"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="Paste the token from your email"
+                autocomplete="off">
+              <div class="input-highlight"></div>
+            </div>
+          </div>
+
+          <!-- New Password Field -->
+          <div class="form-field">
+            <label for="newPassword" class="field-label">
+              <i class="fas fa-lock"></i>
+              <span>New Password</span>
+            </label>
+            <div class="input-container password-field">
+              <input
+                type="password"
+                id="newPassword"
+                class="glass-input"
+                [(ngModel)]="newPassword"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="Enter your new password"
+                autocomplete="new-password">
+              <div class="input-highlight"></div>
+            </div>
+          </div>
+
+          <!-- Confirm Password Field -->
+          <div class="form-field">
+            <label for="confirmPassword" class="field-label">
+              <i class="fas fa-lock"></i>
+              <span>Confirm Password</span>
+            </label>
+            <div class="input-container password-field">
+              <input
+                type="password"
+                id="confirmPassword"
+                class="glass-input"
+                [(ngModel)]="confirmPassword"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="Confirm your new password"
+                autocomplete="new-password">
+              <div class="input-highlight"></div>
+            </div>
+          </div>
+
+          <!-- Success Message -->
+          <div *ngIf="resetTokenMessage" class="modern-alert success-alert" role="alert">
+            <div class="alert-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="alert-content">
+              <span>{{ resetTokenMessage }}</span>
+            </div>
+          </div>
+
+          <!-- Reset Password Button -->
+          <button
+            type="button"
+            class="glass-button primary-button"
+            [disabled]="isTokenResetLoading"
+            (click)="onTokenResetSubmit()">
+            <div class="button-background"></div>
+            <span class="button-text" *ngIf="!isTokenResetLoading">
+              <i class="fas fa-sync-alt"></i>
+              <span>Update Password</span>
+            </span>
+            <span class="button-text" *ngIf="isTokenResetLoading">
+              <div class="pulse-loader">
+                <i class="fas fa-spinner fa-spin"></i>
+              </div>
+              <span>Updating...</span>
+            </span>
+        </button>
+
+          <!-- Back to Login -->
+          <div class="form-footer">
+            <a href="javascript:void(0)" class="glass-link" (click)="hideTokenResetForm()">
+              <i class="fas fa-arrow-left"></i>
+              <span>Back to Login</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- FULL WIDTH: Security Footer -->
+      <div class="security-footer">
+        <div class="security-badge">
+          <i class="fas fa-heart"></i>
+          <span>Your Health, Our Priority</span>
+        </div>
+        <small class="copyright-text">
+          © 2024 Prescripto Healthcare Platform
+        </small>
+      </div>
+    </div>
+  </div>
+</div> 

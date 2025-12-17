@@ -1,0 +1,1034 @@
+/* Clean White & Blue Theme Login Design */
+.glassmorphism-login-container {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #dbeafe 100%);
+}
+
+/* Clean Blue Pattern Background */
+.background-slideshow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(29, 78, 216, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+}
+
+.background-slideshow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%233b82f6" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  opacity: 0.3;
+  animation: subtleMove 20s ease-in-out infinite;
+}
+
+.background-slideshow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, transparent 30%, rgba(59, 130, 246, 0.02) 50%, transparent 70%);
+  animation: gentleShift 15s ease-in-out infinite;
+}
+
+/* Remove the additional background layers - keeping it clean */
+.background-slideshow .bg-layer-3,
+.background-slideshow .bg-layer-4,
+.background-slideshow .bg-layer-5 {
+  display: none;
+}
+
+@keyframes subtleMove {
+  0%, 100% { transform: translateX(0px) translateY(0px); }
+  25% { transform: translateX(10px) translateY(-10px); }
+  50% { transform: translateX(-5px) translateY(10px); }
+  75% { transform: translateX(-10px) translateY(-5px); }
+}
+
+@keyframes gentleShift {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(1deg) scale(1.01); }
+}
+
+/* Clean Blue Particles */
+.medical-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.particle {
+  position: absolute;
+  width: var(--size);
+  height: var(--size);
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 50%;
+  left: var(--x);
+  top: var(--y);
+  animation: particleFloat 20s ease-in-out infinite;
+  animation-delay: var(--delay);
+  box-shadow: 
+    0 0 8px rgba(59, 130, 246, 0.2),
+    0 0 16px rgba(59, 130, 246, 0.1);
+}
+
+.particle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(var(--size) * 1.5);
+  height: calc(var(--size) * 1.5);
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 50%;
+  animation: particlePulse 4s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+@keyframes particleFloat {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px) scale(1);
+    opacity: 0.3;
+  }
+  25% { 
+    transform: translateY(-15px) translateX(10px) scale(1.1);
+    opacity: 0.5;
+  }
+  50% { 
+    transform: translateY(-25px) translateX(-5px) scale(0.9);
+    opacity: 0.2;
+  }
+  75% { 
+    transform: translateY(-10px) translateX(-10px) scale(1.05);
+    opacity: 0.4;
+  }
+}
+
+@keyframes particlePulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.1; }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.3; }
+}
+
+/* Floating Blue Icons */
+.floating-medical-icons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.medical-icon {
+  position: absolute;
+  font-size: 2rem;
+  color: rgba(59, 130, 246, 0.08);
+  left: var(--x);
+  top: var(--y);
+  animation: iconFloat 25s ease-in-out infinite;
+  animation-delay: var(--delay);
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.1);
+}
+
+@keyframes iconFloat {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+    opacity: 0.08;
+  }
+  25% { 
+    transform: translateY(-20px) translateX(15px) rotate(3deg);
+    opacity: 0.12;
+  }
+  50% { 
+    transform: translateY(-35px) translateX(-8px) rotate(-2deg);
+    opacity: 0.05;
+  }
+  75% { 
+    transform: translateY(-20px) translateX(-15px) rotate(4deg);
+    opacity: 0.1;
+  }
+}
+
+/* White Glass Login Card */
+.glass-login-card {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  height: auto;
+  margin: 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  box-shadow: 
+    0 25px 50px rgba(59, 130, 246, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  z-index: 10;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: cardEntry 0.8s ease-out;
+}
+
+.glass-login-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  border-radius: 24px;
+  z-index: -1;
+}
+
+.glass-login-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+    0 35px 70px rgba(59, 130, 246, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+@keyframes cardEntry {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* DESKTOP LAYOUT - Two Columns */
+.card-content {
+  padding: 2.5rem 3rem;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  min-height: 500px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Left Column - Logo and Welcome */
+.logo-section {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.logo-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.medical-cross-logo {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  position: relative;
+  box-shadow: 
+    0 15px 35px rgba(59, 130, 246, 0.3),
+    inset 0 2px 0 rgba(255, 255, 255, 0.5);
+  animation: logoGlow 3s ease-in-out infinite;
+}
+
+.medical-cross-logo i {
+  font-size: 1.8rem;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+.logo-glow {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 50%;
+  opacity: 0.2;
+  animation: pulseGlow 3s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes logoGlow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { 
+    transform: scale(1); 
+    opacity: 0.2; 
+  }
+  50% { 
+    transform: scale(1.1); 
+    opacity: 0.3; 
+  }
+}
+
+.brand-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1e293b, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+  letter-spacing: -1px;
+}
+
+.brand-tagline {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0;
+}
+
+/* Welcome Message */
+.welcome-message {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.welcome-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.welcome-text {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-bottom: 0;
+}
+
+/* Left Column - Logo & Welcome */
+.left-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Right Column - Form Content */
+.right-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Modern Form */
+.modern-form {
+  margin-bottom: 1rem;
+}
+
+.form-field {
+  margin-bottom: 1.25rem;
+}
+
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.85rem;
+  margin-bottom: 0.6rem;
+}
+
+.field-label i {
+  font-size: 0.9rem;
+  color: #3b82f6;
+}
+
+.input-container {
+  position: relative;
+}
+
+.glass-input {
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(59, 130, 246, 0.1);
+  border-radius: 14px;
+  color: #1e293b;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  outline: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.glass-input::placeholder {
+  color: #94a3b8;
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #3b82f6;
+  box-shadow: 
+    0 0 0 4px rgba(59, 130, 246, 0.1),
+    0 8px 32px rgba(59, 130, 246, 0.1);
+}
+
+.glass-input.success {
+  border-color: rgba(34, 197, 94, 0.6);
+  background: rgba(240, 253, 244, 0.8);
+}
+
+.glass-input.error {
+  border-color: rgba(239, 68, 68, 0.6);
+  background: rgba(254, 242, 242, 0.8);
+}
+
+.password-field {
+  position: relative;
+}
+
+.password-reveal {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+  z-index: 2;
+}
+
+.password-reveal:hover {
+  color: #3b82f6;
+}
+
+.input-highlight {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  transition: width 0.3s ease;
+  border-radius: 1px;
+}
+
+.glass-input:focus + .input-highlight {
+  width: 100%;
+}
+
+/* Field Errors */
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin-top: 0.4rem;
+  animation: errorShake 0.4s ease-out;
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+/* Shake animation for form validation errors */
+.shake {
+  animation: shake 0.6s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+  20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+/* Glass Buttons */
+.glass-button {
+  width: 100%;
+  padding: 0.9rem 1.3rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-radius: 14px;
+  color: #1e293b;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  margin-bottom: 0.8rem;
+}
+
+.glass-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transition: left 0.6s ease;
+  z-index: 1;
+}
+
+.glass-button:hover::before {
+  left: 100%;
+}
+
+.primary-button {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  border-color: transparent;
+  box-shadow: 
+    0 8px 32px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.primary-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px rgba(59, 130, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+}
+
+.secondary-button {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: white;
+  border-color: transparent;
+  box-shadow: 
+    0 8px 32px rgba(14, 165, 233, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.secondary-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px rgba(14, 165, 233, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+}
+
+.glass-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: inherit;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.button-text {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.pulse-loader {
+  animation: pulseHeart 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseHeart {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.1); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.1); }
+}
+
+/* Form Footer */
+.form-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+}
+
+.glass-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.glass-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  transition: width 0.3s ease;
+}
+
+.glass-link:hover {
+  color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.glass-link:hover::after {
+  width: 100%;
+}
+
+/* Modern Alerts */
+.modern-alert {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  margin-bottom: 1.2rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: alertSlide 0.3s ease-out;
+  grid-column: 1 / -1;
+}
+
+.error-alert {
+  background: rgba(254, 242, 242, 0.9);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #dc2626;
+}
+
+.success-alert {
+  background: rgba(240, 253, 244, 0.9);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #16a34a;
+}
+
+.alert-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-close {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.9rem;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.alert-close:hover {
+  opacity: 1;
+}
+
+@keyframes alertSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Forgot Password Section */
+.forgot-password-section {
+  text-align: center;
+  grid-column: 1 / -1;
+}
+
+.section-header {
+  margin-bottom: 1.5rem;
+}
+
+.reset-icon-wrapper {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  box-shadow: 
+    0 15px 35px rgba(14, 165, 233, 0.3),
+    inset 0 2px 0 rgba(255, 255, 255, 0.5);
+  animation: resetPulse 2s ease-in-out infinite;
+}
+
+.reset-icon-wrapper i {
+  font-size: 1.5rem;
+  color: white;
+}
+
+@keyframes resetPulse {
+  0%, 100% { 
+    transform: scale(1); 
+    box-shadow: 
+      0 15px 35px rgba(14, 165, 233, 0.3),
+      inset 0 2px 0 rgba(255, 255, 255, 0.5);
+  }
+  50% { 
+    transform: scale(1.05); 
+    box-shadow: 
+      0 20px 45px rgba(14, 165, 233, 0.4),
+      inset 0 2px 0 rgba(255, 255, 255, 0.6);
+  }
+}
+
+.section-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.section-subtitle {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-bottom: 0;
+}
+
+/* Forgot Password Section */
+.forgot-password-section {
+  animation: slideInFromLeft 0.5s ease-out;
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.forgot-password-section .section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.forgot-password-section .reset-icon-wrapper {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #059669, #10b981);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3);
+}
+
+.forgot-password-section .reset-icon-wrapper i {
+  color: white;
+  font-size: 1.4rem;
+}
+
+.forgot-password-section .section-title {
+  color: #1e293b;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.forgot-password-section .section-subtitle {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-bottom: 0;
+  line-height: 1.4;
+}
+
+.forgot-password-section .secondary-button {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+}
+
+.forgot-password-section .secondary-button:hover {
+  background: linear-gradient(135deg, #047857, #059669);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(5, 150, 105, 0.3);
+}
+
+/* Token Reset Section */
+.token-reset-section {
+  animation: slideInFromRight 0.5s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.token-reset-section .section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.token-reset-section .reset-icon-wrapper i {
+  color: white;
+  font-size: 1.6rem;
+}
+
+.token-reset-section .section-title {
+  color: #1e293b;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.token-reset-section .section-subtitle {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-bottom: 0;
+  line-height: 1.4;
+}
+
+.token-reset-section .form-field {
+  margin-bottom: 1.25rem;
+}
+
+.token-reset-section .primary-button {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+}
+
+.token-reset-section .primary-button:hover {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+.token-reset-section .primary-button:disabled {
+  background: linear-gradient(135deg, #94a3b8, #64748b);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.token-reset-section .form-footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  text-align: center;
+}
+
+/* Form Layout Fixes */
+.modern-form, .forgot-password-section, .token-reset-section {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Security Footer */
+.security-footer {
+  text-align: center;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(59, 130, 246, 0.1);
+  grid-column: 1 / -1;
+  width: 100%;
+  position: relative;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.security-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(59, 130, 246, 0.05);
+  padding: 0.4rem 0.8rem;
+  border-radius: 18px;
+  font-size: 0.75rem;
+  color: #3b82f6;
+  font-weight: 500;
+  margin-bottom: 0.6rem;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.copyright-text {
+  color: #64748b;
+  font-size: 0.7rem;
+  display: block;
+  margin-top: 0.4rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .glass-login-card {
+    max-width: 600px;
+  }
+  
+  .card-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 2rem;
+    align-items: stretch;
+  }
+  
+  .security-footer {
+    margin-top: 2rem;
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .glassmorphism-login-container {
+    padding: 1rem;
+  }
+  
+  .glass-login-card {
+    max-width: 100%;
+    margin: 1rem;
+  }
+  
+  .card-content {
+    padding: 1.5rem;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .brand-name {
+    font-size: 1.6rem;
+  }
+  
+  .welcome-title {
+    font-size: 1.3rem;
+  }
+  
+  .medical-cross-logo {
+    width: 55px;
+    height: 55px;
+  }
+  
+  .medical-cross-logo i {
+    font-size: 1.4rem;
+  }
+  
+  .medical-particles,
+  .floating-medical-icons {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-content {
+    padding: 1.2rem;
+  }
+  
+  .brand-name {
+    font-size: 1.4rem;
+  }
+  
+  .welcome-title {
+    font-size: 1.1rem;
+  }
+  
+  .glass-input,
+  .glass-button {
+    padding: 0.8rem 0.9rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .glass-login-card {
+    background: rgba(15, 23, 42, 0.9);
+    border-color: rgba(59, 130, 246, 0.2);
+  }
+  
+  .glass-input {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(59, 130, 246, 0.2);
+    color: #e2e8f0;
+  }
+  
+  .welcome-title, .section-title {
+    color: #e2e8f0;
+  }
+  
+  .brand-name {
+    background: linear-gradient(135deg, #e2e8f0, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+} 

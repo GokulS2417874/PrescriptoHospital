@@ -1,0 +1,66 @@
+<!-- Job Careers Modal -->
+<div class="modal fade show job-careers-modal" [class.d-block]="showModal" tabindex="-1" *ngIf="showModal">
+  <div class="modal-overlay" (click)="closeModal()"></div>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h4 class="modal-title text-center w-100 fw-bold text-primary">Join Our Team</h4>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="text-center mb-4">
+          <div class="career-icon mx-auto mb-3">
+            <img src="/images/Prescripto.png" alt="Prescripto" class="career-logo">
+          </div>
+          <p class="text-muted">Choose your role to start your career with us</p>
+        </div>
+
+        <div class="career-selection">
+          <label class="form-label fw-semibold mb-3">Select Your Role</label>
+          
+          <!-- Debug Display -->
+          <div class="alert alert-info" style="font-size: 12px; margin-bottom: 10px;">
+            <strong>DEBUG:</strong> Current selected role: "{{ selectedJobRole }}"
+            <button type="button" class="btn btn-sm btn-outline-primary ms-2" (click)="getCurrentState()">Log State</button>
+          </div>
+          
+          <div class="role-options">
+            <div class="role-card" [class.selected]="selectedJobRole === 'Doctor'" (click)="selectRole('Doctor')">
+              <div class="role-icon doctor-icon">
+                <i class="fas fa-user-md"></i>
+              </div>
+              <div class="role-info">
+                <h6 class="role-title">Doctor</h6>
+                <p class="role-description">Join as a medical professional and provide expert healthcare services</p>
+                <small class="role-benefits">• Competitive salary • Flexible hours • Medical benefits</small>
+              </div>
+              <div class="role-check">
+                <i class="fas fa-check" *ngIf="selectedJobRole === 'Doctor'"></i>
+              </div>
+            </div>
+
+            <div class="role-card" [class.selected]="selectedJobRole === 'HelpDesk'" (click)="selectRole('HelpDesk')">
+              <div class="role-icon helpdesk-icon">
+                <i class="fas fa-headset"></i>
+              </div>
+              <div class="role-info">
+                <h6 class="role-title">Help Desk</h6>
+                <p class="role-description">Support our patients and staff with excellent customer service</p>
+                <small class="role-benefits">• Great work environment • Training provided • Growth opportunities</small>
+              </div>
+              <div class="role-check">
+                <i class="fas fa-check" *ngIf="selectedJobRole === 'HelpDesk'"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary me-2" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary px-4" [disabled]="!selectedJobRole" (click)="onJobRoleSelect()">
+          <i class="fas fa-arrow-right me-2"></i>Continue Application
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

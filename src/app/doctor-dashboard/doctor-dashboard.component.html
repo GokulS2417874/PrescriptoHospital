@@ -1,0 +1,807 @@
+<!-- Doctor Dashboard -->
+<div class="doctor-dashboard">
+  
+  <!-- Check if user is authenticated -->
+  <div *ngIf="!isAuthenticated()" class="auth-required">
+    <div class="container">
+      <div class="auth-card">
+        <div class="auth-content">
+          <i class="fas fa-lock"></i>
+          <h2>Authentication Required</h2>
+          <p>Please login to access the doctor dashboard</p>
+          <button class="login-btn" routerLink="/login">
+            <i class="fas fa-sign-in-alt"></i>
+            Go to Login
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Content (shown only when authenticated) -->
+  <div *ngIf="isAuthenticated()" class="dashboard-content">
+    
+    <!-- Top Navigation Bar -->
+    <nav class="dashboard-navbar">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <div class="brand-icon">
+            <i class="fas fa-user-md"></i>
+          </div>
+          <div class="brand-text">
+            <h1>Doctor Portal</h1>
+            <span>Healthcare Professional</span>
+          </div>
+        </div>
+        
+        <div class="nav-actions">
+          <div class="doctor-profile-summary" *ngIf="doctorProfile">
+            <div class="profile-avatar">
+              <i class="fas fa-user-md"></i>
+            </div>
+            <div class="profile-info">
+              <span class="doctor-name">Dr. {{ doctorProfile.userName || 'Doctor' }}</span>
+              <span class="doctor-status" [class]="'status-' + getStatusClass(doctorProfile.status)">
+                {{ getStatusText(doctorProfile.status) }}
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </nav>
+
+    <!-- Alert Messages -->
+    <div *ngIf="message" class="alert-container">
+      <div class="alert" [class.alert-success]="messageType === 'success'" [class.alert-error]="messageType === 'error'">
+        <i class="fas" [class.fa-check-circle]="messageType === 'success'" [class.fa-exclamation-circle]="messageType === 'error'"></i>
+        {{ message }}
+        <button class="alert-close" (click)="clearMessage()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Loading your profile...</p>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div *ngIf="!isLoading" class="main-content">
+      
+      <!-- Tab Navigation -->
+      <div class="tab-navigation">
+        <button class="tab-btn" 
+                [class.active]="currentTab === 'dashboard'"
+                (click)="switchTab('dashboard')">
+          <i class="fas fa-tachometer-alt"></i>
+          <span>Dashboard</span>
+        </button>
+        
+        <button class="tab-btn" 
+                [class.active]="currentTab === 'profile'"
+                (click)="switchTab('profile')">
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        </button>
+        
+        <button class="tab-btn" 
+                [class.active]="currentTab === 'appointments'"
+                (click)="switchTab('appointments')">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Appointments</span>
+          <div class="tab-badge" *ngIf="todayAppointments.length > 0">{{ todayAppointments.length }}</div>
+        </button>
+      </div>
+
+      <!-- Dashboard Tab -->
+      <div class="tab-content" *ngIf="currentTab === 'dashboard'">
+        <div class="dashboard-overview">
+          
+          <!-- Welcome Section -->
+          <div class="glass-card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fas fa-stethoscope"></i>
+                Welcome back, {{ doctorProfile?.userName || 'Doctor' }}!
+              </h2>
+            </div>
+            <div class="welcome-content">
+              <p>Here's your medical practice overview for today</p>
+            </div>
+          </div>
+
+       
+        
+            <div class="card-content">
+              <p>Manage your availability for patient consultations</p>
+              
+              <!-- Backend Status -->
+              <div class="backend-status" *ngIf="isLoading || messageType === 'error'">
+                <div class="status-indicator loading" *ngIf="isLoading">
+                  <i class="fas fa-spinner fa-spin"></i>
+                  <span>Loading appointments from API...</span>
+                </div>
+                
+                <div class="status-indicator error" *ngIf="!isLoading && messageType === 'error'">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span>{{ message }}</span>
+                  <button class="retry-btn" (click)="loadDoctorData()">
+                    <i class="fas fa-refresh"></i>
+                    Retry
+                  </button>
+                  <button class="retry-btn" (click)="testPrescriptionEndpoint()" style="margin-left: 10px; background-color: #ff6b6b;">
+                    <i class="fas fa-vial"></i>
+                    Test Prescription API
+                  </button>
+                  <button class="retry-btn" (click)="testViewPrescriptions()" style="margin-left: 10px; background-color: #10b981;">
+                    <i class="fas fa-eye"></i>
+                    Test View Prescriptions
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="quick-stats">
+              <div class="stat-item">
+                <i class="fas fa-calendar-day"></i>
+                <span class="stat-number">{{ todayAppointments.length }}</span>
+                <span class="stat-label">Total Today</span>
+              </div>
+              <div class="stat-item">
+                <i class="fas fa-check-circle"></i>
+                <span class="stat-number">{{ getTodayCompletedCount() }}</span>
+                <span class="stat-label">Completed</span>
+              </div>
+              <div class="stat-item">
+                <i class="fas fa-clock"></i>
+                <span class="stat-number">{{ getTodayPendingCount() }}</span>
+                <span class="stat-label">Pending</span>
+              </div>
+              <div class="stat-item">
+                <i class="fas fa-user-check"></i>
+                <span class="stat-number">{{ getStatusText(doctorProfile?.status) }}</span>
+                <span class="stat-label">Status</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Management -->
+          <div class="status-section">
+            <div class="section-header">
+              <h2>
+                <i class="fas fa-toggle-on"></i>
+                Availability Status
+              </h2>
+              <p>Manage your availability for patient consultations</p>
+            </div>
+            
+            <div class="status-controls">
+              <div class="current-status">
+                <span class="status-label">Current Status:</span>
+                <span class="status-badge" [class]="'status-' + getStatusClass(doctorProfile?.status)" *ngIf="doctorProfile">
+                <i class="fas"
+                [class.fa-circle]="doctorProfile?.status === Status.Online"
+                [class.fa-clock]="doctorProfile?.status === Status.Busy"
+                [class.fa-pause-circle]="doctorProfile?.status === Status.Offline"
+                [class.fa-times-circle]="doctorProfile?.status === Status.Not_Available"></i>
+                {{ getStatusText(doctorProfile?.status) }}
+                </span>
+                <div class="shift-info">
+                  <small class="shift-status">
+                    <i class="fas fa-clock"></i>
+                    {{ getShiftStatusMessage() }}
+                  </small>
+                </div>
+              </div>
+              
+              <div class="status-buttons">
+                <button class="btn-primary action-btn" 
+                        [disabled]="isUpdatingStatus || isOnlineButtonDisabled()"
+                        title="Go Online"
+                        (click)="testButtonClick('Go Online'); updateActiveStatus(Status.Online)">
+                  <i class="fas fa-circle"></i>
+                  <span>Go Online</span>
+                </button>
+                
+                <button class="action-btn" 
+                        [disabled]="isUpdatingStatus"
+                        (click)="testButtonClick('Set Busy'); updateActiveStatus(Status.Busy)"
+                        style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                  <i class="fas fa-clock"></i>
+                  <span>Set Busy</span>
+                </button>
+                
+                <button class="action-btn" 
+                        [disabled]="isUpdatingStatus"
+                        (click)="testButtonClick('Go Offline'); updateActiveStatus(Status.Offline)"
+                        style="background: linear-gradient(135deg, #6b7280, #4b5563);">
+                  <i class="fas fa-pause-circle"></i>
+                  <span>Go Offline</span>
+                </button>
+                
+                <button class="action-btn" 
+                        [disabled]="isUpdatingStatus"
+                        (click)="testButtonClick('Unavailable'); updateActiveStatus(Status.Not_Available)"
+                        style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                  <i class="fas fa-times-circle"></i>
+                  <span>Unavailable</span>
+                </button>
+              </div>
+              
+              <div *ngIf="isUpdatingStatus" class="updating-status">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Updating status...</span>
+              </div>
+              
+              <!-- Debug Section (remove after testing) -->
+              <div class="debug-section" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; font-size: 0.875rem;">
+                <h6>Debug Info:</h6>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                  <div>Current Status: {{ getStatusText(doctorProfile?.status) }}</div>
+                  <div>Is Updating: {{ isUpdatingStatus }}</div>
+                  <div>Shift: {{ doctorProfile?.shift }} ({{ getShiftText(doctorProfile?.shift) }})</div>
+                  <div>Within Shift: {{ isWithinShiftHours() }}</div>
+                  <div>Online Disabled: {{ isOnlineButtonDisabled() }}</div>
+                  <div>Current Time: {{ getCurrentTime() }}</div>
+                </div>
+                <button (click)="resetUpdatingStatus()" class="btn btn-sm btn-secondary mt-2">
+                  Reset Update Flag
+                </button>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+
+      <!-- Profile Tab -->
+      <div class="tab-content" *ngIf="currentTab === 'profile'">
+        <div class="profile-section">
+          
+          <div class="section-header">
+            <h2>
+              <i class="fas fa-user-circle"></i>
+              Doctor Profile
+            </h2>
+            <p>Your professional information and credentials</p>
+          </div>
+          
+          <div class="profile-content" *ngIf="doctorProfile">
+            
+            <!-- Basic Information -->
+            <div class="profile-card">
+              <div class="card-header">
+                <h3>
+                  <i class="fas fa-id-card"></i>
+                  Basic Information
+                </h3>
+                <!-- Profile Actions -->
+                <div class="profile-actions">
+                  <!-- Profile editing functionality removed as requested -->
+                </div>
+              </div>
+              <div class="card-content">
+                <!-- View Mode -->
+                                  <div class="info-grid">
+                  <div class="info-item">
+                   <label>User ID:</label>
+                   <span>{{ doctorProfile.userId || '' }}</span>
+                    </div>
+                  <div class="info-item">
+                    <label>Name:</label>
+                    <span>{{ doctorProfile.userName || '' }}</span>
+                  </div>
+                  
+                  <div class="info-item">
+                    <label>Email:</label>
+                    <span>{{ doctorProfile.email || '' }}</span>
+                  </div>
+                  
+                  <div class="info-item">
+                    <label>Phone:</label>
+                    <span>{{ doctorProfile.phoneNumber || '' }}</span>
+                  </div>
+                  
+                  <div class="info-item">
+                    <label>Specialization:</label>
+                    <span>{{ doctorProfile.specialization || '' }}</span>
+                  </div>
+                  
+                  <div class="info-item">
+                    <label>Qualification:</label>
+                    <span>{{ doctorProfile.qualification || '' }}</span>
+                  </div>
+                  
+                  <div class="info-item">
+                    <label>Experience:</label>
+                    <span>{{ doctorProfile.experienceYears || 0 }} years</span>
+                  </div>
+                </div>
+
+                <!-- Profile editing form removed as requested -->
+                
+              
+                
+              </div>
+            </div>
+
+            <!-- Professional Information -->
+            <div class="profile-card">
+              <div class="card-header">
+                <h3>
+                  <i class="fas fa-stethoscope"></i>
+                  Professional Details
+                </h3>
+              </div>
+              <div class="card-content">
+                <div class="info-grid">
+                  <div class="info-item">
+                    <label>Specialization:</label>
+                    <span>{{ doctorProfile.specialization || 'General Medicine' }}</span>
+                  </div>
+                  <div class="info-item">
+                    <label>Qualification:</label>
+                    <span>{{ doctorProfile.qualification || 'Not specified' }}</span>
+                  </div>
+                  <div class="info-item">
+                    <label>Experience:</label>
+                    <span>{{ doctorProfile.experienceYears || 0 }} years</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Work Information -->
+            <div class="profile-card">
+              <div class="card-header">
+                <h3>
+                  <i class="fas fa-briefcase"></i>
+                  Work Details
+                </h3>
+              </div>
+              <div class="card-content">
+                <div class="info-grid">
+                  <div class="info-item">
+                    <label>Current Status:</label>
+                    <span class="status-badge" [class]="'status-' + getStatusClass(doctorProfile.status)">
+                      {{ getStatusText(doctorProfile.status) }}
+                    </span>
+                  </div>
+                  <div class="info-item">
+                    <label>Work Shift:</label>
+                    <div class="shift-details">
+                      <span class="shift-name">{{ getShiftText(doctorProfile.shift) }}</span>
+                      <small class="shift-times">{{ doctorProfile.shiftStartTime }} - {{ doctorProfile.shiftEndTime }}</small>
+                      <span class="shift-status" [class.active]="isWithinShiftHours()" [class.inactive]="!isWithinShiftHours()">
+                        {{ isWithinShiftHours() ? '🟢 Active' : '🔴 Inactive' }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="info-item">
+                    <label>Join Date:</label>
+                    <span>{{ formatDate(doctorProfile.createdAt) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Profile not loaded state -->
+          <div *ngIf="!doctorProfile && !isLoading" class="no-profile">
+            <i class="fas fa-user-times"></i>
+            <h3>Profile not available</h3>
+            <p>Unable to load profile information. Please try refreshing the page.</p>
+            <button class="refresh-btn" (click)="loadDoctorProfile()">
+              <i class="fas fa-refresh"></i>
+              Refresh Profile
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointments Tab -->
+      <div class="tab-content" *ngIf="currentTab === 'appointments'">
+        <div class="appointments-section">
+          
+          <div class="section-header">
+            <h2>
+              <i class="fas fa-calendar-alt"></i>
+              Today's Appointments
+            </h2>
+            <p>Your scheduled appointments for today</p>
+          </div>
+
+          <div *ngIf="todayAppointments.length === 0" class="empty-state">
+            <i class="fas fa-calendar-times"></i>
+            <h3>No appointments found</h3>
+            <p>You don't have any appointments scheduled.</p>
+          </div>
+
+          <div class="appointments-grid" *ngIf="todayAppointments.length > 0">
+            <div class="appointment-card" *ngFor="let appointment of todayAppointments">
+              <div class="appointment-header">
+                <div class="appointment-date">
+                  <span class="date">{{ formatDate(appointment.appointmentDate) }}</span>
+                  <span class="time" *ngIf="appointment.appointmentStartTime && appointment.appointmentEndTime">
+                    {{ formatTime(appointment.appointmentStartTime) }} - {{ formatTime(appointment.appointmentEndTime) }}
+                  </span>
+                </div>
+                <span class="appointment-status" [class]="'status-' + getAppointmentStatusClass(appointment.appointmentStatus)">
+                  {{ getAppointmentStatusText(appointment.appointmentStatus) }}
+                </span>
+              </div>
+              
+              <div class="appointment-details">
+                <h4>{{ appointment.patientName || 'Patient ID: ' + appointment.patientId }}</h4>
+                <p class="appointment-type">{{ appointment.specialization || 'General Consultation' }}</p>
+                <p class="appointment-id">ID: {{ appointment.appointmentId }}</p>
+                <p class="appointment-reminder" *ngIf="appointment.isReminderSent !== undefined">
+                  <i class="fas" [class.fa-bell]="appointment.isReminderSent" [class.fa-bell-slash]="!appointment.isReminderSent"></i>
+                  {{ appointment.isReminderSent ? 'Reminder sent' : 'No reminder' }}
+                </p>
+              </div>
+              
+              <div class="appointment-actions">
+                <!-- Show action buttons only for scheduled appointments -->
+                <div *ngIf="canUpdateAppointment(appointment)" class="status-actions">
+                  <button class="action-btn completed" 
+                          (click)="updateAppointmentStatus(appointment.appointmentId, true)"
+                          [disabled]="isAppointmentUpdating(appointment.appointmentId)">
+                    <i class="fas fa-check" *ngIf="!isAppointmentUpdating(appointment.appointmentId)"></i>
+                    <i class="fas fa-spinner fa-spin" *ngIf="isAppointmentUpdating(appointment.appointmentId)"></i>
+                    Mark Completed
+                  </button>
+                  <button class="action-btn not-attended" 
+                          (click)="updateAppointmentStatus(appointment.appointmentId, false)"
+                          [disabled]="isAppointmentUpdating(appointment.appointmentId)">
+                    <i class="fas fa-times" *ngIf="!isAppointmentUpdating(appointment.appointmentId)"></i>
+                    <i class="fas fa-spinner fa-spin" *ngIf="isAppointmentUpdating(appointment.appointmentId)"></i>
+                    Not Attended
+                  </button>
+                </div>
+                
+                <!-- Show action buttons for completed appointments -->
+                <div *ngIf="canAddPrescription(appointment)" class="prescription-actions">
+                  <button class="action-btn prescription" 
+                          (click)="openPrescriptionModal(appointment)">
+                    <i class="fas fa-prescription-bottle-alt"></i>
+                    Add Prescription
+                  </button>
+                  <button class="action-btn view-prescription secondary" 
+                          (click)="viewPrescriptions(appointment)">
+                    <i class="fas fa-eye"></i>
+                    View Prescriptions
+                  </button>
+                </div>
+
+                <!-- Show prescription status for appointments with prescriptions -->
+                <div *ngIf="hasPrescription(appointment) && appointment.appointmentStatus === AppointmentStatus.Completed" class="prescription-status">
+                  <div class="prescription-added-badge">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Prescription Added</span>
+                  </div>
+                  <button class="action-btn view-prescription secondary" 
+                          (click)="viewPrescriptions(appointment)">
+                    <i class="fas fa-eye"></i>
+                    View Prescriptions
+                  </button>
+                </div>
+                
+                <!-- Show status for other appointments -->
+                <div *ngIf="!canUpdateAppointment(appointment) && !canAddPrescription(appointment) && !hasPrescription(appointment)" class="final-status">
+                  <span class="status-badge final" [class]="'status-' + getAppointmentStatusClass(appointment.appointmentStatus)">
+                    <i class="fas fa-check-circle" *ngIf="appointment.appointmentStatus === AppointmentStatus.Completed"></i>
+                    <i class="fas fa-times-circle" *ngIf="appointment.appointmentStatus === AppointmentStatus.NotAttended"></i>
+                    <i class="fas fa-ban" *ngIf="appointment.appointmentStatus === AppointmentStatus.Cancelled"></i>
+                    {{ getAppointmentStatusText(appointment.appointmentStatus) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<!-- Prescription Modal -->
+<div class="modal-overlay" *ngIf="showPrescriptionModal" (click)="closePrescriptionModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>
+        <i class="fas fa-prescription-bottle-alt"></i>
+        Add Prescription
+      </h3>
+      <button class="close-btn" (click)="closePrescriptionModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Appointment Info -->
+      <div class="appointment-info-card" *ngIf="selectedAppointment">
+        <h4>Appointment Details</h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Appointment ID:</label>
+            <span>{{ selectedAppointment.appointmentId }}</span>
+          </div>
+          <div class="info-item">
+            <label>Patient ID:</label>
+            <span>{{ selectedAppointment.patientId }}</span>
+          </div>
+          <div class="info-item">
+            <label>Patient Name:</label>
+            <span>{{ selectedAppointment.patientName || 'Unknown Patient' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Date:</label>
+            <span>{{ formatDate(selectedAppointment.appointmentDate) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prescription Form -->
+      <form [formGroup]="prescriptionForm" (ngSubmit)="submitPrescription()">
+        <!-- Instructions -->
+        <div class="form-group">
+          <label for="instructions">
+            <i class="fas fa-notes-medical"></i>
+            Instructions <span class="required">*</span>
+          </label>
+          <textarea 
+            id="instructions"
+            formControlName="instructions"
+            rows="4"
+            placeholder="Enter detailed instructions for the patient..."
+            class="form-control"
+            [class.error]="prescriptionForm.get('instructions')?.invalid && prescriptionForm.get('instructions')?.touched">
+          </textarea>
+          <div class="error-message" *ngIf="prescriptionForm.get('instructions')?.invalid && prescriptionForm.get('instructions')?.touched">
+            <div *ngIf="prescriptionForm.get('instructions')?.errors?.['required']">Instructions are required</div>
+            <div *ngIf="prescriptionForm.get('instructions')?.errors?.['minlength']">Instructions must be at least 10 characters</div>
+          </div>
+        </div>
+
+        <!-- Medicines -->
+        <div class="medicines-section">
+          <div class="section-header">
+            <h4>
+              <i class="fas fa-pills"></i>
+              Medicines
+            </h4>
+            <button type="button" class="add-medicine-btn" (click)="addMedicine()">
+              <i class="fas fa-plus"></i>
+              Add Medicine
+            </button>
+          </div>
+
+          <div formArrayName="medicines" class="medicines-list">
+            <div *ngFor="let medicine of medicines.controls; let i = index" 
+                 [formGroupName]="i" 
+                 class="medicine-card">
+              
+              <div class="medicine-header">
+                <h5>Medicine {{ i + 1 }}</h5>
+                <button type="button" 
+                        class="remove-medicine-btn" 
+                        (click)="removeMedicine(i)"
+                        *ngIf="medicines.length > 1">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+
+              <div class="medicine-form-grid">
+                <!-- Medicine Type -->
+                <div class="form-group">
+                  <label>
+                    Medicine Type <span class="required">*</span>
+                  </label>
+                  <select formControlName="medicineType" 
+                          class="form-control"
+                          [class.error]="medicine.get('medicineType')?.invalid && (medicine.get('medicineType')?.dirty || medicine.get('medicineType')?.touched)">
+                    <option value="">Select Medicine</option>
+                    <option *ngFor="let option of medicineTypeOptions" 
+                            [value]="option.value.toString()">
+                      {{ option.label }}
+                    </option>
+                  </select>
+                  <div class="error-message" *ngIf="medicine.get('medicineType')?.invalid && (medicine.get('medicineType')?.dirty || medicine.get('medicineType')?.touched)">
+                    Please select a medicine type
+                  </div>
+                </div>
+
+                <!-- Dosage -->
+                <div class="form-group">
+                  <label>
+                    Dosage <span class="required">*</span>
+                  </label>
+                  <select formControlName="dosages" 
+                          class="form-control"
+                          [class.error]="medicine.get('dosages')?.invalid && (medicine.get('dosages')?.dirty || medicine.get('dosages')?.touched)">
+                    <option value="">Select Dosage</option>
+                    <option *ngFor="let option of dosageTypeOptions" 
+                            [value]="option.value.toString()">
+                      {{ option.label }}
+                    </option>
+                  </select>
+                  <div class="error-message" *ngIf="medicine.get('dosages')?.invalid && (medicine.get('dosages')?.dirty || medicine.get('dosages')?.touched)">
+                    Please select a dosage
+                  </div>
+                </div>
+
+                <!-- Schedule Time -->
+                <div class="form-group">
+                  <label>
+                    Schedule Time <span class="required">*</span>
+                  </label>
+                  <select formControlName="scheduleTime" 
+                          class="form-control"
+                          [class.error]="medicine.get('scheduleTime')?.invalid && (medicine.get('scheduleTime')?.dirty || medicine.get('scheduleTime')?.touched)">
+                    <option value="">Select Schedule Time</option>
+                    <option *ngFor="let option of scheduleTimeOptions" 
+                            [value]="option.value.toString()">
+                      {{ option.label }}
+                    </option>
+                  </select>
+                  <div class="error-message" *ngIf="medicine.get('scheduleTime')?.invalid && (medicine.get('scheduleTime')?.dirty || medicine.get('scheduleTime')?.touched)">
+                    Please select a schedule time
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closePrescriptionModal()">
+            Cancel
+          </button>
+          <button type="submit" 
+                  class="btn-submit" 
+                  [disabled]="prescriptionForm.invalid || isAddingPrescription">
+            <i class="fas fa-save" *ngIf="!isAddingPrescription"></i>
+            <i class="fas fa-spinner fa-spin" *ngIf="isAddingPrescription"></i>
+            {{ isAddingPrescription ? 'Adding...' : 'Add Prescription' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div> 
+
+<!-- View Prescriptions Modal -->
+<div class="modal-overlay" *ngIf="showViewPrescriptionsModal" (click)="closeViewPrescriptionsModal()">
+  <div class="modal-content prescription-view-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>
+        <i class="fas fa-prescription-bottle-alt"></i>
+        Prescription History
+      </h3>
+      <button class="close-btn" (click)="closeViewPrescriptionsModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Patient Info -->
+      <div class="patient-info-card" *ngIf="selectedAppointment">
+        <h4>
+          <i class="fas fa-user"></i>
+          Patient Information
+        </h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Patient Name:</label>
+            <span>{{ selectedAppointment.patientName || 'Unknown Patient' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Patient ID:</label>
+            <span>{{ selectedAppointment.patientId }}</span>
+          </div>
+          <div class="info-item">
+            <label>Total Prescriptions:</label>
+            <span>{{ viewingPrescriptions.length }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="loadingPrescriptions">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Loading prescriptions...</p>
+      </div>
+
+      <!-- Prescriptions List -->
+      <div class="prescriptions-list" *ngIf="!loadingPrescriptions && viewingPrescriptions.length > 0">
+        <div class="prescription-card" *ngFor="let prescription of viewingPrescriptions; let i = index">
+          <div class="prescription-header">
+            <h5>
+              <i class="fas fa-file-prescription"></i>
+              Prescription #{{ i + 1 }}
+            </h5>
+            <div class="prescription-meta">
+              <span class="prescription-id">ID: {{ prescription.prescriptionId || 'Auto-Generated' }}</span>
+              <span class="prescription-date" *ngIf="prescription.createdAt">
+                <i class="fas fa-calendar"></i>
+                {{ formatDate(prescription.createdAt) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="prescription-content">
+            <!-- Doctor Information -->
+            <div class="doctor-info" *ngIf="prescription.doctorId">
+              <label><i class="fas fa-user-md"></i> Prescribed by:</label>
+              <span>Doctor ID: {{ prescription.doctorId }}</span>
+            </div>
+
+            <!-- Instructions -->
+            <div class="instructions-section" *ngIf="prescription.instructions">
+              <label><i class="fas fa-notes-medical"></i> General Instructions:</label>
+              <p class="instructions-text">{{ prescription.instructions }}</p>
+            </div>
+
+            <!-- Medicines -->
+            <div class="medicines-section" *ngIf="prescription.medicines && prescription.medicines.length > 0">
+              <label><i class="fas fa-pills"></i> Prescribed Medicines:</label>
+              <div class="medicines-list">
+                <div class="medicine-item" *ngFor="let medicine of prescription.medicines; let j = index">
+                  <div class="medicine-header">
+                    <span class="medicine-number">{{ j + 1 }}.</span>
+                    <span class="medicine-type">{{ formatMedicineType(medicine.medicineType) }} {{ formatDosageType(medicine.dosages) }}</span>
+                  </div>
+                  <div class="medicine-details">
+                    <div class="detail-item">
+                      <i class="fas fa-clock"></i>
+                      <span class="label">Schedule:</span>
+                      <span class="value">{{ formatScheduleTime(medicine.scheduleTime) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- No medicines fallback -->
+            <div class="no-medicines" *ngIf="!prescription.medicines || prescription.medicines.length === 0">
+              <i class="fas fa-info-circle"></i>
+              <div class="no-medicines-content">
+                <span class="no-medicines-text">Detailed medicine information not available</span>
+                <div class="basic-prescription-info" *ngIf="prescription.medications">
+                  <label><i class="fas fa-file-medical"></i> Basic Prescription:</label>
+                  <p class="medications-text">{{ prescription.medications }}</p>
+                </div>
+                <small class="no-medicines-note">
+                  Complete medicine details may not be available in the new format.
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Prescriptions State -->
+      <div class="no-prescriptions" *ngIf="!loadingPrescriptions && viewingPrescriptions.length === 0">
+        <i class="fas fa-prescription-bottle-alt"></i>
+        <h4>No Prescriptions Found</h4>
+        <p>No prescription history is available for this patient.</p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeViewPrescriptionsModal()">
+        <i class="fas fa-times"></i>
+        Close
+      </button>
+    </div>
+  </div>
+</div> 

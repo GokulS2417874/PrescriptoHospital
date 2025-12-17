@@ -1,0 +1,1532 @@
+<!-- Modern Medical Admin Dashboard -->
+<div class="admin-dashboard">
+
+
+  <!-- Top Navigation Bar -->
+  <nav class="dashboard-navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <div class="brand-icon">
+          <i class="fas fa-hospital-user"></i>
+        </div>
+        <div class="brand-text">
+          <h1>Admin Portal</h1>
+          <span>Healthcare Management</span>
+        </div>
+      </div>
+      
+      <div class="nav-actions">
+        <div class="admin-profile">
+          <div class="profile-avatar">
+            <i class="fas fa-user-shield"></i>
+          </div>
+          <span>Admin</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="dashboard-content">
+    <!-- Main Tabs -->
+    <div class="content-tabs">
+      <div class="tab-navigation">
+        <button class="tab-btn" 
+                [class.active]="currentTab === 'employees'"
+                (click)="switchTab('employees')">
+          <i class="fas fa-users"></i>
+          <span>Employee Management</span>
+          <div *ngIf="pendingEmployeesCount > 0" class="tab-badge">{{ pendingEmployeesCount }}</div>
+        </button>
+        
+        <button class="tab-btn" 
+                [class.active]="currentTab === 'appointments'"
+                (click)="switchTab('appointments')">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Appointment Analytics</span>
+          <div class="tab-badge info">{{ todayAppointmentCount }}</div>
+        </button>
+        
+        <button class="tab-btn" 
+                [class.active]="currentTab === 'financial'"
+                (click)="switchTab('financial')">
+          <i class="fas fa-chart-line"></i>
+          <span>Financial Analytics</span>
+          <div class="tab-badge success">₹{{ dailyEarnings | number:'1.0-0' }}</div>
+        </button>
+        
+        <button class="tab-btn" 
+                [class.active]="currentTab === 'patients'"
+                (click)="switchTab('patients')">
+          <i class="fas fa-user-injured"></i>
+          <span>Patient Management</span>
+          <div class="tab-badge info">{{ totalPatientsCount }}</div>
+        </button>
+      </div>
+
+      <!-- Statistics Cards - Contextual based on active tab -->
+      <div class="stats-grid">
+        <!-- Employee Management Stats -->
+        <div *ngIf="currentTab === 'employees'">
+          <div class="stat-card pending">
+            <div class="stat-icon">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+              <h3>{{ pendingEmployeesCount }}</h3>
+              <p>Pending Approvals</p>
+            </div>
+          </div>
+          
+          <div class="stat-card employees">
+            <div class="stat-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+              <h3>{{ allEmployees.length }}</h3>
+              <p>Total Employees</p>
+            </div>
+          </div>
+          
+          <div class="stat-card shifts">
+            <div class="stat-icon">
+              <i class="fas fa-user-clock"></i>
+            </div>
+            <div class="stat-info">
+              <h3>{{ shiftNotAllocatedEmployees.length }}</h3>
+              <p>Unassigned Shifts</p>
+            </div>
+          </div>
+          
+          <div class="stat-card rejected">
+            <div class="stat-icon">
+              <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="stat-info">
+              <h3>{{ notApprovedEmployees.length }}</h3>
+              <p>Rejected Applications</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Appointment Analytics Stats -->
+        <div *ngIf="currentTab === 'appointments' && currentAppointmentTab === 'today'">
+          
+          <div class="stat-card appointments">
+            <div class="stat-icon">
+              <i class="fas fa-calendar-day"></i>
+            </div>
+            <div class="stat-info">
+              <h3>{{ todayAppointmentCount || 0 }}</h3>
+              <p>Today's Scheduled</p>
+            </div>
+          </div>
+          
+          <div class="stat-card monthly">
+            <div class="stat-icon">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="stat-info">
+              <h3>{{ selectedMonthCount || 0 }}</h3>
+              <p>This Month</p>
+            </div>
+          </div>
+          
+          <div class="stat-card yearly">
+            <div class="stat-icon">
+              <i class="fas fa-chart-bar"></i>
+            </div>
+            <div class="stat-info">
+              <h3>{{ selectedYearCount || 0 }}</h3>
+              <p>This Year</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Sub-tab Stats -->
+        <div *ngIf="currentTab === 'appointments' && currentAppointmentTab === 'analytics'">
+          
+          <div class="stat-card appointments">
+            <div class="stat-icon">
+              <i class="fas fa-calendar-day"></i>
+            </div>
+            <div class="stat-info">
+              <h3>{{ selectedDateCount || 0 }}</h3>
+              <p>Selected Date</p>
+            </div>
+          </div>
+          
+          <div class="stat-card monthly">
+            <div class="stat-icon">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="stat-info">
+              <h3>{{ selectedMonthCount || 0 }}</h3>
+              <p>Selected Month</p>
+            </div>
+          </div>
+          
+          <div class="stat-card yearly">
+            <div class="stat-icon">
+              <i class="fas fa-chart-bar"></i>
+            </div>
+            <div class="stat-info">
+              <h3>{{ selectedYearCount || 0 }}</h3>
+              <p>Selected Year</p>
+            </div>
+          </div>
+          
+
+        </div>
+
+        <!-- Financial Analytics Stats -->
+        <div *ngIf="currentTab === 'financial'">
+          <!-- All 4 stat cards removed as requested -->
+        </div>
+
+        <!-- Patient Management Stats -->
+        <div *ngIf="currentTab === 'patients'">
+          <div class="stat-card patients">
+            <div class="stat-icon">
+              <i class="fas fa-user-injured"></i>
+            </div>
+            <div class="stat-info">
+              <h3>{{ totalPatientsCount || 0 }}</h3>
+              <p>Total Patients</p>
+            </div>
+          </div>
+          
+          <div class="stat-card filtered">
+            <div class="stat-icon">
+              <i class="fas fa-filter"></i>
+            </div>
+            <div class="stat-info">
+              <h3>{{ allPatients.length || 0 }}</h3>
+              <p>Filtered Results</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert Messages -->
+      <div *ngIf="message" class="alert-container">
+        <div class="alert" [class.alert-success]="messageType === 'success'" [class.alert-error]="messageType === 'error'">
+          <i class="fas" [class.fa-check-circle]="messageType === 'success'" [class.fa-exclamation-circle]="messageType === 'error'"></i>
+          {{ message }}
+          <button class="alert-close" (click)="clearMessage()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Employee Management Tab -->
+      <div class="tab-content" *ngIf="currentTab === 'employees'">
+        <!-- Employee Sub-navigation -->
+        <div class="sub-nav">
+          <button class="sub-nav-btn" 
+                  [class.active]="currentEmployeeTab === 'pending'"
+                  (click)="switchEmployeeTab('pending')">
+            <i class="fas fa-hourglass-half"></i>
+            Pending Approvals
+            <span *ngIf="pendingEmployeesCount > 0" class="count-badge">{{ pendingEmployeesCount }}</span>
+          </button>
+          
+          <button class="sub-nav-btn" 
+                  [class.active]="currentEmployeeTab === 'all'"
+                  (click)="switchEmployeeTab('all')">
+            <i class="fas fa-list"></i>
+            All Employees
+            <span class="count-badge">{{ allEmployees.length }}</span>
+          </button>
+          
+          <button class="sub-nav-btn" 
+                  [class.active]="currentEmployeeTab === 'shifts'"
+                  (click)="switchEmployeeTab('shifts')">
+            <i class="fas fa-clock"></i>
+            Shift Assignment
+            <span *ngIf="shiftNotAllocatedEmployees.length > 0" class="count-badge warning">{{ shiftNotAllocatedEmployees.length }}</span>
+          </button>
+          
+          <button class="sub-nav-btn" 
+                  [class.active]="currentEmployeeTab === 'rejected'"
+                  (click)="switchEmployeeTab('rejected')">
+            <i class="fas fa-times-circle"></i>
+            Rejected
+            <span class="count-badge error">{{ notApprovedEmployees.length }}</span>
+          </button>
+        </div>
+
+        <!-- Employee Filters -->
+        <div class="employee-filters" *ngIf="currentEmployeeTab === 'all'">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label for="specialization">Doctor Specialization:</label>
+              <select id="specialization" [(ngModel)]="selectedSpecialization" class="filter-select">
+                <option value="">All Specializations</option>
+                <option *ngFor="let spec of [
+                  'Cardiologist', 
+                  'Dermatologist', 
+                  'Neurologist', 
+                  'Orthopedic_Surgeon', 
+                  'Pediatrician', 
+                  'Psychiatrist', 
+                  'Ophthalmologist', 
+                  'ENT_Specialist', 
+                  'Gastroenterologist', 
+                  'Urologist', 
+                  'Endocrinologist', 
+                  'Oncologist'
+                ]" [value]="spec">
+                  {{ getSpecializationDisplayName(spec) }}
+                </option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="searchName">Search by Name:</label>
+              <input id="searchName" 
+                     type="text" 
+                     [(ngModel)]="searchName" 
+                     placeholder="Enter employee name"
+                     class="filter-input">
+            </div>
+
+            <div class="filter-group">
+              <label for="searchId">Search by ID:</label>
+              <input id="searchId" 
+                     type="number" 
+                     [(ngModel)]="searchId" 
+                     placeholder="Enter employee ID"
+                     class="filter-input">
+            </div>
+
+            <div class="filter-actions">
+              <button class="btn btn-primary" (click)="applyFilters()">
+                <i class="fas fa-search"></i> Apply Filters
+              </button>
+              <button class="btn btn-secondary" (click)="clearFilters()" *ngIf="isFilterActive">
+                <i class="fas fa-times"></i> Clear Filters
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending Employees -->
+        <div class="data-section" *ngIf="currentEmployeeTab === 'pending'">
+          <div class="section-header">
+            <h2>
+              <i class="fas fa-user-check"></i>
+              Pending Employee Approvals
+            </h2>
+            <p>Review and approve new employee registrations</p>
+          </div>
+          
+          <div *ngIf="pendingEmployees.length === 0" class="empty-state">
+            <i class="fas fa-check-circle"></i>
+            <h3>All caught up!</h3>
+            <p>No pending employee approvals at the moment.</p>
+          </div>
+          
+          <div class="employee-grid" *ngIf="pendingEmployees.length > 0">
+            <div class="employee-card" *ngFor="let employee of pendingEmployees">
+              <div class="employee-header">
+                <div class="employee-avatar">
+                  <i class="fas fa-user-md" *ngIf="employee.role === 'Doctor'"></i>
+                  <i class="fas fa-headset" *ngIf="employee.role === 'HelpDesk'"></i>
+                  <i class="fas fa-user" *ngIf="employee.role !== 'Doctor' && employee.role !== 'HelpDesk'"></i>
+                </div>
+                <div class="employee-info">
+                  <h4>{{ employee.userName }}</h4>
+                  <span class="role-badge" [class]="employee.role ? employee.role.toLowerCase() : 'unknown'">{{ employee.role }}</span>
+                </div>
+                <div class="employee-status">
+                  <span class="status-badge pending">Pending</span>
+                </div>
+              </div>
+              
+              <div class="employee-details">
+                <div class="detail-item">
+                  <i class="fas fa-envelope"></i>
+                  <span>{{ employee.email }}</span>
+                </div>
+                <div class="detail-item" *ngIf="employee.phoneNumber">
+                  <i class="fas fa-phone"></i>
+                  <span>{{ employee.phoneNumber }}</span>
+                </div>
+                <div class="detail-item" *ngIf="employee.specialization">
+                  <i class="fas fa-stethoscope"></i>
+                  <span>{{ employee.specialization }}</span>
+                </div>
+                <div class="detail-item" *ngIf="employee.experienceYears">
+                  <i class="fas fa-calendar"></i>
+                  <span>{{ employee.experienceYears }} years experience</span>
+                </div>
+              </div>
+              
+              <div class="employee-actions">
+                <button class="action-btn details" 
+                        (click)="showEmployeeDetails(employee)"
+                        title="View Details">
+                  <i class="fas fa-eye"></i>
+                  Details
+                </button>
+                <button class="action-btn approve" 
+                        (click)="approveEmployee(employee)"
+                        [disabled]="isProcessing">
+                  <i class="fas fa-check"></i>
+                  Approve
+                </button>
+                <button class="action-btn reject" 
+                        (click)="rejectEmployee(employee)"
+                        [disabled]="isProcessing">
+                  <i class="fas fa-times"></i>
+                  Reject
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- All Employees -->
+        <div class="data-section" *ngIf="currentEmployeeTab === 'all'">
+          <div class="section-header">
+            <h2>
+              <i class="fas fa-users"></i>
+              All Employees
+            </h2>
+            <p>Complete list of approved employees</p>
+          </div>
+
+          <!-- Sub-navigation for All Employees -->
+          <div class="sub-nav-container">
+            <button class="sub-nav-btn small" 
+                    [class.active]="allEmployeesSubTab === 'All'"
+                    (click)="showAllEmployeesSubTab()">
+              <i class="fas fa-list"></i>
+              All
+              <span class="count-badge">{{ allEmployees.length }}</span>
+            </button>
+            
+            <button class="sub-nav-btn small" 
+                    [class.active]="allEmployeesSubTab === 'Doctor'"
+                    (click)="showDoctorEmployees()">
+              <i class="fas fa-user-md"></i>
+              Doctors
+              <span class="count-badge">{{ doctorEmployees.length }}</span>
+            </button>
+            
+            <button class="sub-nav-btn small" 
+                    [class.active]="allEmployeesSubTab === 'HelpDesk'"
+                    (click)="showHelpDeskEmployees()">
+              <i class="fas fa-headset"></i>
+              HelpDesk
+              <span class="count-badge">{{ helpDeskEmployees.length }}</span>
+            </button>
+          </div>
+          
+          <!-- View Mode Toggle -->
+          <div class="view-toggle-container">
+            <button class="view-toggle-btn" 
+                    [class.active]="employeeViewMode === 'grid'"
+                    (click)="toggleEmployeeViewMode('grid')"
+                    title="Grid View">
+              <i class="fas fa-th"></i>
+            </button>
+            <button class="view-toggle-btn" 
+                    [class.active]="employeeViewMode === 'table'"
+                    (click)="toggleEmployeeViewMode('table')"
+                    title="Table View">
+              <i class="fas fa-table"></i>
+            </button>
+          </div>
+
+          <!-- Grid View -->
+          <div class="employee-grid-container" *ngIf="employeeViewMode === 'grid'">
+            <div class="employee-grid">
+              <div class="employee-card" 
+                   *ngFor="let employee of getCurrentEmployees()"
+                   (click)="showEmployeeDetails(employee)">
+                <div class="employee-avatar">
+                  <i class="fas fa-user-md" *ngIf="employee.role === 'Doctor'"></i>
+                  <i class="fas fa-headset" *ngIf="employee.role === 'HelpDesk'"></i>
+                  <!--<i class="fas fa-user-nurse" *ngIf="employee.role === 'Nurse'"></i>-->
+                  <i class="fas fa-user" *ngIf="employee.role !== 'Doctor' && employee.role !== 'HelpDesk'"></i>
+                </div>
+                <div class="employee-info">
+                  <h3 class="employee-name">{{ employee.userName }}</h3>
+                  <p class="employee-id">ID: {{ employee.userId }}</p>
+                  <div class="employee-details">
+                    <span class="role-badge" [class]="employee.role ? employee.role.toLowerCase() : 'unknown'">{{ employee.role }}</span>
+                    <span class="status-badge" 
+                          [class.pending]="employee.isApprovedByAdmin == 0"
+                          [class.approved]="employee.isApprovedByAdmin == 1"
+                          [class.rejected]="employee.isApprovedByAdmin == 2">
+                      {{ employee.isApprovedByAdmin == 0 ? 'Pending' : employee.isApprovedByAdmin == 1 ? 'Approved' : 'Rejected' }}
+                    </span>
+                  </div>
+                  <div class="employee-contact">
+                    <div class="contact-item" *ngIf="employee.email">
+                      <i class="fas fa-envelope"></i>
+                      <span>{{ employee.email }}</span>
+                    </div>
+                    <div class="contact-item" *ngIf="employee.phoneNumber">
+                      <i class="fas fa-phone"></i>
+                      <span>{{ employee.phoneNumber }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table View -->
+          <div class="table-container" *ngIf="employeeViewMode === 'table'">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Role</th>
+                  <th>Contact</th>
+                  <th>Specialization</th>
+                  <th>Shift</th>
+                  <th>Experience</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let employee of getCurrentEmployees()">
+                  <td>
+                    <div class="employee-cell">
+                      <div class="employee-avatar small">
+                        <i class="fas fa-user-md" *ngIf="employee.role === 'Doctor'"></i>
+                        <i class="fas fa-user-nurse" *ngIf="employee.role === 'Nurse'"></i>
+                        <i class="fas fa-user" *ngIf="employee.role !== 'Doctor' && employee.role !== 'Nurse'"></i>
+                      </div>
+                      <div>
+                        <div class="employee-name">{{ employee.userName }}</div>
+                        <div class="employee-email">{{ employee.email }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="role-badge" [class]="employee.role ? employee.role.toLowerCase() : 'unknown'">{{ employee.role }}</span>
+                  </td>
+                  <td>{{ employee.phoneNumber || 'N/A' }}</td>
+                  <td>{{ employee.specialization || 'N/A' }}</td>
+                  <td>
+                    <span class="shift-badge" 
+                          [class.morning]="employee.shift == 0"
+                          [class.afternoon]="employee.shift == 1"
+                          [class.night]="employee.shift == 2"
+                          [class.not-allocated]="employee.shift == 3">
+                      {{ employee.shift == 0 ? 'Morning' : employee.shift == 1 ? 'Afternoon' : employee.shift == 2 ? 'Night' : 'Not Allocated' }}
+                    </span>
+                  </td>
+                  <td>{{ employee.experienceYears || 'N/A' }} years</td>
+                  <td>
+                    <span class="status-badge" 
+                          [class.pending]="employee.isApprovedByAdmin == 0"
+                          [class.approved]="employee.isApprovedByAdmin == 1"
+                          [class.rejected]="employee.isApprovedByAdmin == 2">
+                      {{ employee.isApprovedByAdmin == 0 ? 'Pending' : employee.isApprovedByAdmin == 1 ? 'Approved' : 'Rejected' }}
+                    </span>
+                  </td>
+                  <td>
+                    <button class="action-btn details small" 
+                            (click)="showEmployeeDetails(employee)"
+                            title="View Details">
+                      <i class="fas fa-eye"></i>
+                      Details
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Shift Assignment -->
+        <div class="data-section" *ngIf="currentEmployeeTab === 'shifts'">
+          <div class="section-header">
+            <h2>
+              <i class="fas fa-clock"></i>
+              Shift Assignment
+            </h2>
+            <p>Assign shifts to employees</p>
+          </div>
+          
+          <div *ngIf="shiftNotAllocatedEmployees.length === 0" class="empty-state">
+            <i class="fas fa-check-circle"></i>
+            <h3>All shifts assigned!</h3>
+            <p>All employees have been assigned to shifts.</p>
+          </div>
+          
+          <div class="employee-grid" *ngIf="shiftNotAllocatedEmployees.length > 0">
+            <div class="employee-card" *ngFor="let employee of shiftNotAllocatedEmployees">
+              <div class="employee-header">
+                <div class="employee-avatar">
+                  <i class="fas fa-user-md" *ngIf="employee.role === 'Doctor'"></i>
+                  <i class="fas fa-headset" *ngIf="employee.role === 'HelpDesk'"></i>
+                  <i class="fas fa-user" *ngIf="employee.role !== 'Doctor' && employee.role !== 'HelpDesk'"></i>
+                </div>
+                <div class="employee-info">
+                  <h4>{{ employee.userName }}</h4>
+                  <span class="role-badge" [class]="employee.role ? employee.role.toLowerCase() : 'unknown'">{{ employee.role }}</span>
+                </div>
+                <div class="employee-status">
+                  <span class="status-badge warning">No Shift</span>
+                </div>
+              </div>
+              
+              <div class="employee-actions">
+                <button class="action-btn details" 
+                        (click)="showEmployeeDetails(employee)"
+                        title="View Details">
+                  <i class="fas fa-eye"></i>
+                  Details
+                </button>
+              </div>
+              
+              <div class="shift-assignment">
+                <h5>Assign Shift</h5>
+                <div class="shift-options">
+                  <button class="shift-btn morning" 
+                          (click)="testMorningClick(employee); setTempShift(employee.userId, 0); applyTempShift(employee)"
+                          [disabled]="isProcessing">
+                    <i class="fas fa-sun"></i>
+                    Morning (9 AM - 1 PM)
+                  </button>
+                  <button class="shift-btn afternoon" 
+                          (click)="setTempShift(employee.userId, 1); applyTempShift(employee)"
+                          [disabled]="isProcessing">
+                    <i class="fas fa-cloud-sun"></i>
+                    Afternoon (1 PM - 9 PM)
+                  </button>
+                  <button class="shift-btn night" 
+                          (click)="setTempShift(employee.userId, 2); applyTempShift(employee)"
+                          [disabled]="isProcessing">
+                    <i class="fas fa-moon"></i>
+                    Night (9 PM - 5 AM)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rejected Employees -->
+        <div class="data-section" *ngIf="currentEmployeeTab === 'rejected'">
+          <div class="section-header">
+            <h2>
+              <i class="fas fa-times-circle"></i>
+              Rejected Employees
+            </h2>
+            <p>Manage rejected employee applications</p>
+          </div>
+          
+          <div *ngIf="notApprovedEmployees.length === 0" class="empty-state">
+            <i class="fas fa-check-circle"></i>
+            <h3>No rejected applications</h3>
+            <p>No employee applications have been rejected.</p>
+          </div>
+          
+          <div class="employee-grid" *ngIf="notApprovedEmployees.length > 0">
+            <div class="employee-card rejected" *ngFor="let employee of notApprovedEmployees">
+              <div class="employee-header">
+                <div class="employee-avatar">
+                  <i class="fas fa-user-slash"></i>
+                </div>
+                <div class="employee-info">
+                  <h4>{{ employee.userName }}</h4>
+                  <span class="role-badge" [class]="employee.role ? employee.role.toLowerCase() : 'unknown'">{{ employee.role }}</span>
+                </div>
+                <div class="employee-status">
+                  <span class="status-badge rejected">Rejected</span>
+                </div>
+              </div>
+              
+              <div class="employee-details">
+                <div class="detail-item">
+                  <i class="fas fa-envelope"></i>
+                  <span>{{ employee.email }}</span>
+                </div>
+              </div>
+              
+              <div class="employee-actions">
+                <button class="action-btn details" 
+                        (click)="showEmployeeDetails(employee)"
+                        title="View Details">
+                  <i class="fas fa-eye"></i>
+                  Details
+                </button>
+                <button class="action-btn delete" 
+                        (click)="deleteEmployee(employee)"
+                        [disabled]="isProcessing">
+                  <i class="fas fa-trash"></i>
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointments Tab -->
+      <div class="tab-content" *ngIf="currentTab === 'appointments'">
+        <!-- Appointment Sub-navigation -->
+        <div class="sub-nav">
+          <button class="sub-nav-btn" 
+                  [class.active]="currentAppointmentTab === 'today'"
+                  (click)="switchAppointmentTab('today')">
+            <i class="fas fa-calendar-day"></i>
+            Today's Appointments
+            <span class="count-badge">{{ todayAppointmentCount }}</span>
+          </button>
+          
+          <button class="sub-nav-btn" 
+                  [class.active]="currentAppointmentTab === 'analytics'"
+                  (click)="switchAppointmentTab('analytics')">
+            <i class="fas fa-chart-bar"></i>
+            Analytics
+          </button>
+        </div>
+
+        <!-- Today's Appointments -->
+        <div class="data-section" *ngIf="currentAppointmentTab === 'today'">
+          <div class="section-header">
+            <h2>
+              <i class="fas fa-calendar-day"></i>
+              Today's Appointments
+            </h2>
+            <p>Real-time view of today's scheduled appointments</p>
+          </div>
+          
+          <div *ngIf="todayAppointments.length === 0" class="empty-state">
+            <i class="fas fa-calendar-times"></i>
+            <h3>No appointments today</h3>
+            <p>There are no appointments scheduled for today.</p>
+          </div>
+          
+          <div class="appointments-list" *ngIf="todayAppointments.length > 0">
+            <div class="appointment-card" *ngFor="let appointment of todayAppointments">
+              <div class="appointment-time">
+                <div class="time-info">
+                  <span class="time">{{ appointment.appointmentStartTime }}</span>
+                  <span class="date">{{ appointment.appointmentDate | date:'MMM dd' }}</span>
+                </div>
+                <div class="appointment-status" [class]="getAppointmentStatusClass(appointment.appointmentStatus)">
+                  {{ appointment.appointmentStatus }}
+                </div>
+              </div>
+              
+              <div class="appointment-details">
+                <div class="patient-info">
+                  <h4>{{ appointment.patientName }}</h4>
+                  <span class="patient-id">Patient ID: {{ appointment.patientId }}</span>
+                </div>
+                
+                <div class="doctor-info">
+                  <span class="doctor-name">
+                    <i class="fas fa-user-md"></i>
+                    Dr. {{ appointment.doctorName }}
+                  </span>
+                  <span class="specialization">{{ appointment.specialization }}</span>
+                </div>
+                
+                <div class="appointment-meta">
+                  <span class="duration">
+                    <i class="fas fa-clock"></i>
+                    {{ appointment.appointmentStartTime }} - {{ appointment.appointmentEndTime }}
+                  </span>
+                  <span class="reminder" [class.sent]="appointment.isReminderSent">
+                    <i class="fas" [class.fa-bell]="appointment.isReminderSent" [class.fa-bell-slash]="!appointment.isReminderSent"></i>
+                    {{ appointment.isReminderSent ? 'Reminder Sent' : 'No Reminder' }}
+                  </span>
+                </div>
+              </div>
+              
+              <button class="appointment-action" (click)="viewAppointmentDetails(appointment)">
+                <i class="fas fa-eye"></i>
+                View Details
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div class="data-section" *ngIf="currentAppointmentTab === 'analytics'">
+          <div class="section-header">
+            <h2>
+              <i class="fas fa-chart-bar"></i>
+              Appointment Analytics
+            </h2>
+            <p>Detailed insights and analytics for appointment management</p>
+          </div>
+          
+          <!-- Enhanced Search Controls -->
+          <div class="enhanced-search-section">
+            <div class="section-header">
+              <h3><i class="fas fa-search-plus"></i> Advanced Appointment Search</h3>
+            </div>
+            <div class="search-filters">
+              <div class="filter-row">
+                <div class="filter-group">
+                  <label>Date Range:</label>
+                  <input type="date" [(ngModel)]="appointmentStartDate" placeholder="Start Date" class="date-input">
+                  <span>to</span>
+                  <input type="date" [(ngModel)]="appointmentEndDate" placeholder="End Date" class="date-input">
+                </div>
+                <div class="filter-group">
+                  <label>Status:</label>
+                  <select [(ngModel)]="selectedAppointmentStatus" class="filter-select">
+                    <option value="">All Statuses</option>
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="InProgress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="Rescheduled">Rescheduled</option>
+                  </select>
+                </div>
+              </div>
+              <div class="filter-row">
+                <div class="filter-group">
+                  <label>Patient Name:</label>
+                  <input type="text" [(ngModel)]="appointmentPatientName" placeholder="Search patient..." class="text-input">
+                </div>
+                <div class="filter-group">
+                  <label>Doctor Name:</label>
+                  <input type="text" [(ngModel)]="appointmentDoctorName" placeholder="Search doctor..." class="text-input">
+                </div>
+                <div class="filter-actions">
+                  <button class="btn btn-primary search-btn" (click)="searchAppointmentsAdvanced()">
+                    <i class="fas fa-search"></i> Search Appointments
+                  </button>
+                  <button class="btn btn-secondary" (click)="clearAppointmentFilters()">
+                    <i class="fas fa-times"></i> Clear
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="analytics-grid">
+            <div class="analytics-card">
+              <h3>Search by Date</h3>
+              <div class="date-search">
+                <input type="date" 
+                       [(ngModel)]="selectedDate" 
+                       class="date-input"
+                       placeholder="Select date">
+                <button class="search-btn" (click)="searchAppointmentsByDate()">
+                  <i class="fas fa-search"></i>
+                  Search
+                </button>
+              </div>
+            </div>
+            
+            <div class="analytics-card">
+              <h3>Search by Month</h3>
+              <div class="month-search">
+                <select [(ngModel)]="selectedMonth" class="month-select">
+                  <option value="0">Month</option>
+                  <option value="1">January</option>
+                  <option value="2">February</option>
+                  <option value="3">March</option>
+                  <option value="4">April</option>
+                  <option value="5">May</option>
+                  <option value="6">June</option>
+                  <option value="7">July</option>
+                  <option value="8">August</option>
+                  <option value="9">September</option>
+                  <option value="10">October</option>
+                  <option value="11">November</option>
+                  <option value="12">December</option>
+                </select>
+                <select [(ngModel)]="selectedYear" class="year-select">
+                  <option value="0">Select Year</option>
+                  <option value="2023">2023</option>
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                </select>
+                <button class="search-btn" (click)="searchAppointmentsByMonth()">
+                  <i class="fas fa-search"></i>
+                  Search
+                </button>
+              </div>
+            </div>
+            
+            <div class="analytics-card">
+              <h3>Search by Year</h3>
+              <div class="year-search">
+                <select [(ngModel)]="selectedYearOnly" class="year-select">
+                  <option value="0">Select Year</option>
+                  <option value="2023">2023</option>
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                </select>
+                <button class="search-btn" (click)="searchAppointmentsByYear()">
+                  <i class="fas fa-search"></i>
+                  Search
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Search Results -->
+          <div class="search-results" *ngIf="searchResults.length > 0">
+            <h3>Search Results ({{ searchResults.length }} appointments)</h3>
+            <div class="appointments-list">
+              <div class="appointment-card enhanced" *ngFor="let appointment of searchResults">
+                <div class="appointment-summary">
+                  <div class="appointment-date">
+                    <i class="fas fa-calendar"></i>
+                    {{ appointment.appointmentDate | date:'MMM dd, yyyy' }}
+                  </div>
+                  <div class="appointment-time">
+                    <i class="fas fa-clock"></i>
+                    {{ appointment.appointmentStartTime }} - {{ appointment.appointmentEndTime }}
+                  </div>
+                  <div class="patient-doctor">
+                    <span class="patient">{{ appointment.patientName }}</span>
+                    <span class="arrow">→</span>
+                    <span class="doctor">Dr. {{ appointment.doctorName }}</span>
+                  </div>
+                  <div class="appointment-status" [class]="getAppointmentStatusClass(appointment.appointmentStatus)">
+                    {{ appointment.appointmentStatus }}
+                  </div>
+                  <div class="specialization" *ngIf="appointment.specialization">
+                    <i class="fas fa-stethoscope"></i>
+                    {{ appointment.specialization }}
+                  </div>
+                </div>
+                
+                <!-- Payment Details for Completed Appointments -->
+                <div class="payment-details" *ngIf="appointment.appointmentStatus === 'Completed' && hasPaymentInfo(appointment)">
+                  <div class="payment-header">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Payment Information</span>
+                  </div>
+                  <div class="payment-info">
+                    <div class="payment-amount">
+                      <span class="label">Total:</span>
+                      <span class="amount">₹{{ getPaymentAmount(appointment, 'total') | number:'1.2-2' }}</span>
+                    </div>
+                    <div class="payment-status">
+                      <span class="label">Status:</span>
+                      <span class="status" [class.paid]="isPaymentPaid(appointment)" [class.pending]="!isPaymentPaid(appointment)">
+                        {{ getPaymentStatus(appointment) }}
+                      </span>
+                    </div>
+                    <div class="payment-method">
+                      <span class="label">Method:</span>
+                      <span>{{ getPaymentMethodForAppointment(appointment) }}</span>
+                    </div>
+                  </div>
+                  <button class="btn btn-sm btn-info" (click)="viewPaymentDetailsForAppointment(appointment)">
+                    <i class="fas fa-receipt"></i> View Payment
+                  </button>
+                </div>
+                
+                <div class="appointment-actions">
+                  <button class="appointment-action" (click)="viewAppointmentDetails(appointment)">
+                    <i class="fas fa-eye"></i>
+                    View Details
+                  </button>
+
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- No Results Message -->
+          <div class="no-results" *ngIf="searchResults && searchResults.length === 0">
+            <div class="empty-state">
+              <i class="fas fa-search"></i>
+              <h3>No appointments found</h3>
+              <p>No appointments were found for the selected criteria. Try selecting a different date, month, or year.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Analytics Tab -->
+      <div class="tab-content" *ngIf="currentTab === 'financial'">
+        <div class="data-section">
+          <div class="section-header">
+            <h2>
+              <i class="fas fa-chart-line"></i>
+              Financial Analytics
+            </h2>
+            <p>Simple and clean revenue analysis dashboard</p>
+          </div>
+          
+          <!-- Date Controls -->
+          <div class="financial-controls">
+            <div class="control-group">
+              <label>Daily Earnings Date:</label>
+              <input type="date" 
+                     [(ngModel)]="selectedEarningsDate" 
+                     (change)="onEarningsDateChange()"
+                     class="date-input">
+              <button class="search-btn" (click)="loadDailyEarnings()">
+                <i class="fas fa-search"></i>
+                Search
+              </button>
+            </div>
+            
+            <div class="control-group">
+              <label>Month:</label>
+              <select [(ngModel)]="selectedEarningsMonth" 
+                      (change)="onEarningsMonthChange()"
+                      class="month-select">
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+              </select>
+              <button class="search-btn" (click)="loadMonthlyEarnings()">
+                <i class="fas fa-search"></i>
+                Search
+              </button>
+            </div>
+            
+            <div class="control-group">
+              <label>Year:</label>
+              <select [(ngModel)]="selectedEarningsYear" 
+                      (change)="onEarningsYearChange()"
+                      class="year-select">
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+              </select>
+              <button class="search-btn" (click)="loadYearlyEarnings()">
+                <i class="fas fa-search"></i>
+                Search
+              </button>
+            </div>
+          </div>
+
+
+
+          <!-- Revenue Cards -->
+          <div class="revenue-analytics-grid">
+            <!-- Daily Revenue Card -->
+            <div class="revenue-card daily-revenue">
+              <div class="revenue-header">
+                <div class="revenue-icon">
+                  <i class="fas fa-calendar-day"></i>
+                </div>
+                <div class="revenue-title">
+                  <h3>Daily Revenue</h3>
+                  <p>{{ selectedEarningsDate | date:'mediumDate' }}</p>
+                </div>
+              </div>
+              <div class="revenue-amount">
+                <span class="currency">₹</span>
+                <span class="amount">{{ dailyEarnings | number:'1.0-2' }}</span>
+              </div>
+              <div class="revenue-footer">
+                <i class="fas fa-info-circle"></i>
+                <span>Today's earnings from appointments</span>
+              </div>
+            </div>
+
+            <!-- Monthly Revenue Card -->
+            <div class="revenue-card monthly-revenue">
+              <div class="revenue-header">
+                <div class="revenue-icon">
+                  <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="revenue-title">
+                  <h3>Monthly Revenue</h3>
+                  <p>{{ selectedEarningsMonth === 1 ? 'January' : selectedEarningsMonth === 2 ? 'February' : selectedEarningsMonth === 3 ? 'March' : selectedEarningsMonth === 4 ? 'April' : selectedEarningsMonth === 5 ? 'May' : selectedEarningsMonth === 6 ? 'June' : selectedEarningsMonth === 7 ? 'July' : selectedEarningsMonth === 8 ? 'August' : selectedEarningsMonth === 9 ? 'September' : selectedEarningsMonth === 10 ? 'October' : selectedEarningsMonth === 11 ? 'November' : 'December' }} {{ selectedEarningsYear }}</p>
+                </div>
+              </div>
+              <div class="revenue-amount">
+                <span class="currency">₹</span>
+                <span class="amount">{{ monthlyEarnings | number:'1.0-2' }}</span>
+              </div>
+              <div class="revenue-footer">
+                <i class="fas fa-info-circle"></i>
+                <span>Total monthly earnings</span>
+              </div>
+            </div>
+
+            <!-- Yearly Revenue Card -->
+            <div class="revenue-card yearly-revenue">
+              <div class="revenue-header">
+                <div class="revenue-icon">
+                  <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="revenue-title">
+                  <h3>Yearly Revenue</h3>
+                  <p>{{ selectedEarningsYear }}</p>
+                </div>
+              </div>
+              <div class="revenue-amount">
+                <span class="currency">₹</span>
+                <span class="amount">{{ yearlyEarnings | number:'1.0-2' }}</span>
+              </div>
+              <div class="revenue-footer">
+                <i class="fas fa-info-circle"></i>
+                <span>Total yearly earnings</span>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+
+      <!-- Patient Management Tab -->
+      <div class="tab-content" *ngIf="currentTab === 'patients'">
+        <div class="data-section">
+          <div class="section-header">
+            <h2>
+              <i class="fas fa-user-injured"></i>
+              Patient Management
+            </h2>
+            <p>View and manage all registered patients in the system</p>
+          </div>
+          
+          <!-- Patient Filters -->
+          <div class="patient-filters">
+            <div class="filter-row">
+              <div class="filter-group">
+                <label for="patientSearchName">Search by Name:</label>
+                <input id="patientSearchName" type="text" [(ngModel)]="patientSearchName" placeholder="Enter patient name" class="filter-input">
+              </div>
+              <div class="filter-group">
+                <label for="patientSearchId">Search by ID:</label>
+                <input id="patientSearchId" type="number" [(ngModel)]="patientSearchId" placeholder="Enter patient ID" class="filter-input">
+              </div>
+              <div class="filter-actions">
+                <button class="btn btn-primary" (click)="applyPatientFilters()">
+                  <i class="fas fa-search"></i> Apply Filters
+                </button>
+                <button class="btn btn-secondary" (click)="clearPatientFilters()" *ngIf="isPatientFilterActive">
+                  <i class="fas fa-times"></i> Clear Filters
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Patients List -->
+          <div *ngIf="allPatients.length === 0" class="empty-state">
+            <i class="fas fa-user-injured"></i>
+            <h3>No patients found</h3>
+            <p *ngIf="!isPatientFilterActive">No patients are registered in the system.</p>
+            <p *ngIf="isPatientFilterActive">No patients match your search criteria.</p>
+          </div>
+
+          <div class="patients-grid" *ngIf="allPatients.length > 0">
+            <div class="patient-card" *ngFor="let patient of allPatients; trackBy: trackByPatientId">
+              <div class="patient-header">
+                <div class="patient-avatar">
+                  <i class="fas fa-user-injured"></i>
+                </div>
+                <div class="patient-info">
+                  <h4>{{ patient.userName }}</h4>
+                  <p class="patient-email">{{ patient.email }}</p>
+                  <span class="patient-id">ID: {{ patient.userId }}</span>
+                </div>
+              </div>
+              
+              <div class="patient-details">
+                <div class="detail-item" *ngIf="patient.phoneNumber">
+                  <i class="fas fa-phone"></i>
+                  <span>{{ patient.phoneNumber }}</span>
+                </div>
+                <div class="detail-item" *ngIf="patient.dateOfBirth">
+                  <i class="fas fa-birthday-cake"></i>
+                  <span>{{ patient.dateOfBirth | date:'MMM dd, yyyy' }}</span>
+                </div>
+                <div class="detail-item" *ngIf="patient.gender">
+                  <i class="fas fa-venus-mars"></i>
+                  <span>{{ patient.gender }}</span>
+                </div>
+                <div class="detail-item" *ngIf="patient.emergencyContactName">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span>{{ patient.emergencyContactName }}</span>
+                </div>
+              </div>
+              
+              <div class="patient-actions">
+                <button class="action-btn details" 
+                        (click)="showPatientDetails(patient)"
+                        title="View Details">
+                  <i class="fas fa-eye"></i>
+                  View Details
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Employee Details Modal -->
+<div class="modal-overlay" *ngIf="showEmployeeDetailsModal" (click)="closeEmployeeDetailsModal()">
+  <div class="employee-details-modal" (click)="$event.stopPropagation()" *ngIf="selectedEmployee">
+    <div class="modal-header">
+      <h2>
+        <i class="fas fa-user-md" *ngIf="isDoctor(selectedEmployee)"></i>
+        <i class="fas fa-headset" *ngIf="isHelpDesk(selectedEmployee)"></i>
+        <i class="fas fa-user" *ngIf="!isDoctor(selectedEmployee) && !isHelpDesk(selectedEmployee)"></i>
+        {{ selectedEmployee.userName }}
+      </h2>
+      <button class="close-btn" (click)="closeEmployeeDetailsModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Basic Information -->
+      <div class="details-section">
+        <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+        <div class="details-grid">
+          <div class="detail-item">
+            <label>Full Name:</label>
+            <span>{{ selectedEmployee.userName }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Email:</label>
+            <span>{{ selectedEmployee.email }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Role:</label>
+            <span class="role-badge" [ngClass]="selectedEmployee.role ? selectedEmployee.role.toLowerCase() : 'unknown'">
+              {{ selectedEmployee.role }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <label>Phone Number:</label>
+            <span>{{ selectedEmployee.phoneNumber || 'Not provided' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Date of Birth:</label>
+            <span>{{ selectedEmployee.dateOfBirth || 'Not provided' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Gender:</label>
+            <span>{{ selectedEmployee.gender || 'Not specified' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Professional Information -->
+      <div class="details-section" *ngIf="isDoctor(selectedEmployee) || isHelpDesk(selectedEmployee)">
+        <h3><i class="fas fa-briefcase"></i> Professional Information</h3>
+        <div class="details-grid">
+          <!-- Doctor-specific fields -->
+          <div class="detail-item" *ngIf="isDoctor(selectedEmployee)">
+            <label>Specialization:</label>
+            <span>{{ selectedEmployee.specialization || 'Not specified' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedEmployee.qualification">
+            <label>Qualification:</label>
+            <span>{{ selectedEmployee.qualification }}</span>
+          </div>
+          <div class="detail-item" *ngIf="isDoctor(selectedEmployee)">
+            <label>Experience:</label>
+            <span>{{ selectedEmployee.experienceYears ? selectedEmployee.experienceYears + ' years' : 'Not specified' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="isDoctor(selectedEmployee) && selectedEmployee.consultantFees">
+            <label>Consultant Fees:</label>
+            <span>₹{{ selectedEmployee.consultantFees }}</span>
+          </div>
+          <!-- HelpDesk-specific fields -->
+          <div class="detail-item" *ngIf="isHelpDesk(selectedEmployee)">
+            <label>Languages:</label>
+            <span>{{ selectedEmployee.languages || 'Not specified' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Contact -->
+      <div class="details-section" *ngIf="selectedEmployee.emergencyContactName">
+        <h3><i class="fas fa-phone-alt"></i> Emergency Contact</h3>
+        <div class="details-grid">
+          <div class="detail-item">
+            <label>Contact Name:</label>
+            <span>{{ selectedEmployee.emergencyContactName }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Relationship:</label>
+            <span>{{ selectedEmployee.emergencyContactRelationship || 'Not specified' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Phone Number:</label>
+            <span>{{ selectedEmployee.emergencyContactPhoneNumber || 'Not provided' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Work Information -->
+      <div class="details-section">
+        <h3><i class="fas fa-clock"></i> Work Information</h3>
+        <div class="details-grid">
+          <div class="detail-item">
+            <label>Shift:</label>
+            <span class="shift-badge" 
+                  [class.morning]="selectedEmployee.shift == 0"
+                  [class.afternoon]="selectedEmployee.shift == 1"
+                  [class.night]="selectedEmployee.shift == 2"
+                  [class.not-allocated]="selectedEmployee.shift == 3">
+              {{ selectedEmployee.shift == 0 ? 'Morning (9 AM - 1 PM)' : selectedEmployee.shift == 1 ? 'Afternoon (1 PM - 9 PM)' : selectedEmployee.shift == 2 ? 'Night (9 PM - 5 AM)' : 'Not Allocated' }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <label>Approval Status:</label>
+            <span class="status-badge" 
+                  [class.pending]="selectedEmployee.isApprovedByAdmin == 0"
+                  [class.approved]="selectedEmployee.isApprovedByAdmin == 1"
+                  [class.rejected]="selectedEmployee.isApprovedByAdmin == 2">
+              {{ selectedEmployee.isApprovedByAdmin == 0 ? 'Pending Review' : selectedEmployee.isApprovedByAdmin == 1 ? 'Approved' : 'Rejected' }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <label>Joined Date:</label>
+            <span>{{ selectedEmployee.createdAt | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeEmployeeDetailsModal()">
+        <i class="fas fa-times"></i> Close
+      </button>
+      <button class="btn btn-primary" *ngIf="selectedEmployee.isApprovedByAdmin == 0" 
+              (click)="approveEmployee(selectedEmployee)">
+        <i class="fas fa-check"></i> Approve
+      </button>
+      <button class="btn btn-danger" *ngIf="selectedEmployee.isApprovedByAdmin == 0" 
+              (click)="rejectEmployee(selectedEmployee)">
+        <i class="fas fa-times"></i> Reject
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Patient Details Modal -->
+<div class="modal-overlay" *ngIf="showPatientDetailsModal" (click)="closePatientDetailsModal()">
+  <div class="patient-details-modal" (click)="$event.stopPropagation()" *ngIf="selectedPatient">
+    <div class="modal-header">
+      <h2>
+        <i class="fas fa-user-injured"></i>
+        {{ selectedPatient.userName }}
+      </h2>
+      <button class="close-btn" (click)="closePatientDetailsModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Basic Information -->
+      <div class="details-section">
+        <h3><i class="fas fa-user"></i> Basic Information</h3>
+        <div class="details-grid">
+          <div class="detail-item">
+            <label>Patient ID:</label>
+            <span>{{ selectedPatient.userId }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Full Name:</label>
+            <span>{{ selectedPatient.userName }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Email:</label>
+            <span>{{ selectedPatient.email }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedPatient.phoneNumber">
+            <label>Phone Number:</label>
+            <span>{{ selectedPatient.phoneNumber }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedPatient.dateOfBirth">
+            <label>Date of Birth:</label>
+            <span>{{ selectedPatient.dateOfBirth | date:'MMM dd, yyyy' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedPatient.gender">
+            <label>Gender:</label>
+            <span>{{ selectedPatient.gender }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedPatient.createdAt">
+            <label>Registration Date:</label>
+            <span>{{ selectedPatient.createdAt | date:'MMM dd, yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Contact -->
+      <div class="details-section" *ngIf="selectedPatient.emergencyContactName">
+        <h3><i class="fas fa-phone-alt"></i> Emergency Contact</h3>
+        <div class="details-grid">
+          <div class="detail-item">
+            <label>Contact Name:</label>
+            <span>{{ selectedPatient.emergencyContactName }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedPatient.emergencyContactPhoneNumber">
+            <label>Contact Phone:</label>
+            <span>{{ selectedPatient.emergencyContactPhoneNumber }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closePatientDetailsModal()">
+        <i class="fas fa-times"></i> Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Appointment Details Modal -->
+<div class="modal-overlay" *ngIf="showAppointmentDetailsModal" (click)="closeAppointmentDetailsModal()">
+  <div class="appointment-details-modal" (click)="$event.stopPropagation()" *ngIf="selectedAppointment">
+    <div class="modal-header">
+      <h2>
+        <i class="fas fa-calendar-alt"></i>
+        Appointment Details
+      </h2>
+      <button class="close-btn" (click)="closeAppointmentDetailsModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Appointment Information -->
+      <div class="details-section">
+        <h3><i class="fas fa-info-circle"></i> Appointment Information</h3>
+        <div class="details-grid">
+          <div class="detail-item">
+            <label>Appointment ID:</label>
+            <span>{{ selectedAppointment.appointmentId }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Date:</label>
+            <span>{{ selectedAppointment.appointmentDate | date:'MMM dd, yyyy' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Time:</label>
+            <span>{{ selectedAppointment.appointmentStartTime }} - {{ selectedAppointment.appointmentEndTime }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Status:</label>
+            <span class="status-badge" [class]="getAppointmentStatusClass(selectedAppointment.appointmentStatus)">
+              {{ selectedAppointment.appointmentStatus }}
+            </span>
+          </div>
+          <div class="detail-item" *ngIf="selectedAppointment.specialization">
+            <label>Specialization:</label>
+            <span>{{ selectedAppointment.specialization }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Patient Information - Updated - Clean Build - Payment Fix -->
+      <div class="details-section">
+        <h3><i class="fas fa-user-injured"></i> Patient Information</h3>
+        <div class="details-grid">
+          <div class="detail-item">
+            <label>Patient ID:</label>
+            <span>{{ selectedAppointment.patientId }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Patient Name:</label>
+            <span>{{ selectedAppointment.patientName }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doctor Information -->
+      <div class="details-section">
+        <h3><i class="fas fa-user-md"></i> Doctor Information</h3>
+        <div class="details-grid">
+          <div class="detail-item">
+            <label>Doctor ID:</label>
+            <span>{{ selectedAppointment.doctorId }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Doctor Name:</label>
+            <span>Dr. {{ selectedAppointment.doctorName }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Information -->
+      <div class="details-section" *ngIf="selectedAppointment.appointmentStatus === 'Completed'">
+        <h3><i class="fas fa-credit-card"></i> Payment Information</h3>
+        <div class="details-grid" *ngIf="hasPaymentInfo(selectedAppointment); else noPaymentInfo">
+          <div class="detail-item">
+            <label>Total Amount:</label>
+            <span class="payment-amount">₹{{ getPaymentAmount(selectedAppointment, 'total') | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Paid Amount:</label>
+            <span class="payment-amount">₹{{ getPaymentAmount(selectedAppointment, 'paid') | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Payment Status:</label>
+            <span class="payment-status-badge" [class.paid]="isPaymentPaid(selectedAppointment)" [class.pending]="!isPaymentPaid(selectedAppointment)">
+              <i class="fas" [class.fa-check-circle]="isPaymentPaid(selectedAppointment)" [class.fa-clock]="!isPaymentPaid(selectedAppointment)"></i>
+              {{ getPaymentStatus(selectedAppointment) }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <label>Payment Method:</label>
+            <span>{{ getPaymentMethodForAppointment(selectedAppointment) }}</span>
+          </div>
+          <div class="detail-item" *ngIf="hasPaymentInfo(selectedAppointment) && getPaymentDate(selectedAppointment)">
+            <label>Payment Date:</label>
+            <span>{{ getPaymentDate(selectedAppointment) | date:'MMM dd, yyyy HH:mm' }}</span>
+          </div>
+        </div>
+        <ng-template #noPaymentInfo>
+          <div class="no-payment-info">
+            <p><i class="fas fa-info-circle"></i> No payment information available for this appointment.</p>
+
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Additional Information -->
+      <div class="details-section">
+        <h3><i class="fas fa-clipboard"></i> Additional Information</h3>
+        <div class="details-grid">
+          <div class="detail-item">
+            <label>Reminder Status:</label>
+            <span class="reminder-badge" [class.sent]="selectedAppointment.isReminderSent">
+              <i class="fas" [class.fa-bell]="selectedAppointment.isReminderSent" [class.fa-bell-slash]="!selectedAppointment.isReminderSent"></i>
+              {{ selectedAppointment.isReminderSent ? 'Reminder Sent' : 'No Reminder Sent' }}
+            </span>
+          </div>
+          <div class="detail-item" *ngIf="selectedAppointment.fileName">
+            <label>Attached File:</label>
+            <span>{{ selectedAppointment.fileName }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeAppointmentDetailsModal()">
+        <i class="fas fa-times"></i> Close
+      </button>
+    </div>
+  </div>
+</div>
+
+ 

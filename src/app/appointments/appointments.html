@@ -1,0 +1,490 @@
+<div class="appointments-container">
+  <div class="container py-4">
+    <!-- Header -->
+    <div class="header-section mb-4">
+      <h2 class="text-center mb-1">My Appointments</h2>
+      <p class="text-center text-muted">Manage your healthcare appointments</p>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-3">Loading your appointments...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="error-container text-center py-5">
+      <div class="alert alert-danger" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        {{ error }}
+      </div>
+      <button class="btn btn-primary" (click)="loadAppointments()">
+        <i class="fas fa-refresh me-2"></i>Try Again
+      </button>
+    </div>
+
+    <!-- Content when loaded successfully -->
+    <div *ngIf="!isLoading && !error">
+      
+      <!-- Upcoming Appointments -->
+      <div class="appointments-section mb-5">
+        <div class="section-header d-flex justify-content-between align-items-center mb-4">
+          <h3 class="section-title">
+            <i class="fas fa-calendar-alt me-2"></i>
+            Upcoming Appointments
+            <span class="badge bg-primary ms-2">{{ upcomingAppointments.length }}</span>
+          </h3>
+          <div class="header-actions">
+            <button class="btn btn-outline-secondary btn-sm me-2" (click)="refreshAppointments()" [disabled]="isLoading">
+              <i class="fas fa-sync-alt me-1" [class.fa-spin]="isLoading"></i>Refresh
+            </button>
+            <button class="btn btn-outline-primary btn-sm" routerLink="/doctors">
+              <i class="fas fa-plus me-2"></i>Book New
+            </button>
+          </div>
+        </div>
+
+        <!-- Upcoming Appointments Grid -->
+        <div class="row" *ngIf="upcomingAppointments.length > 0; else noUpcoming">
+          <div class="col-lg-6 col-md-6 mb-4" *ngFor="let appointment of upcomingAppointments">
+            <div class="appointment-card upcoming-card">
+              <!-- Appointment Header -->
+              <div class="appointment-header">
+                <div class="doctor-info">
+                  <div class="doctor-avatar">
+                    <i class="fas fa-user-md"></i>
+                  </div>
+                  <div class="doctor-details">
+                    <h5 class="doctor-name">{{ appointment.doctorName || 'Doctor' }}</h5>
+                    <p class="doctor-specialization">{{ appointment.specialization || 'General Medicine' }}</p>
+                    <small class="text-muted">ID: #{{ appointment.doctorId }}</small>
+                  </div>
+                </div>
+                <div class="appointment-status">
+                  <span class="status-badge" [class]="getStatusClass(appointment.appointmentStatus)">
+                    <i class="fas fa-clock"></i>
+                    {{ appointment.appointmentStatus | titlecase }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Appointment Details -->
+              <div class="appointment-details">
+                <div class="detail-row">
+                  <i class="fas fa-calendar-alt detail-icon"></i>
+                  <span>{{ formatDate(appointment.appointmentDate) }}</span>
+                </div>
+                <div class="detail-row">
+                  <i class="fas fa-clock detail-icon"></i>
+                  <span>{{ formatTime(appointment.appointmentStartTime) }} - {{ formatTime(appointment.appointmentEndTime) }}</span>
+                </div>
+                <div class="detail-row">
+                  <i class="fas fa-hashtag detail-icon"></i>
+                  <span>Appointment #{{ appointment.appointmentId }}</span>
+                </div>
+                <div class="detail-row" *ngIf="appointment.filePath">
+                  <i class="fas fa-file-medical detail-icon"></i>
+                  <span>Medical History: {{ appointment.fileName }}</span>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="appointment-actions">
+                <button class="btn btn-outline-danger btn-sm" (click)="cancelAppointment(appointment)">
+                  <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <button class="btn btn-outline-primary btn-sm" (click)="rescheduleAppointment(appointment)">
+                  <i class="fas fa-edit me-1"></i>Reschedule
+                </button>
+                <button 
+                  *ngIf="appointment.filePath" 
+                  class="btn btn-outline-success btn-sm" 
+                  (click)="downloadMedicalHistory(appointment)">
+                  <i class="fas fa-download me-1"></i>Download File
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Upcoming Appointments -->
+        <ng-template #noUpcoming>
+          <div class="empty-state text-center py-5">
+            <div class="empty-icon">
+              <i class="fas fa-calendar-plus fa-3x text-muted"></i>
+            </div>
+            <h4 class="mt-3">No upcoming appointments</h4>
+            <p class="text-muted mb-4">You don't have any scheduled appointments at the moment.</p>
+            <button class="btn btn-primary" routerLink="/doctors">
+              <i class="fas fa-plus me-2"></i>Book Your First Appointment
+            </button>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Past Appointments -->
+      <div class="appointments-section" *ngIf="pastAppointments.length > 0">
+        <div class="section-header mb-4">
+          <h3 class="section-title">
+            <i class="fas fa-history me-2"></i>
+            Past Appointments
+            <span class="badge bg-secondary ms-2">{{ pastAppointments.length }}</span>
+          </h3>
+        </div>
+
+        <!-- Past Appointments Grid -->
+        <div class="row">
+          <div class="col-lg-6 col-md-6 mb-4" *ngFor="let appointment of pastAppointments">
+            <div class="appointment-card past-card">
+              <!-- Appointment Header -->
+              <div class="appointment-header">
+                <div class="doctor-info">
+                  <div class="doctor-avatar">
+                    <i class="fas fa-user-md"></i>
+                  </div>
+                  <div class="doctor-details">
+                    <h5 class="doctor-name">{{ appointment.doctorName || 'Doctor' }}</h5>
+                    <p class="doctor-specialization">{{ appointment.specialization || 'General Medicine' }}</p>
+                    <small class="text-muted">ID: #{{ appointment.doctorId }}</small>
+                  </div>
+                </div>
+                <div class="appointment-status">
+                  <span class="status-badge" [class]="getStatusClass(appointment.appointmentStatus)">
+                    <i class="fas fa-check-circle" *ngIf="appointment.appointmentStatus === 'Completed'"></i>
+                    <i class="fas fa-times-circle" *ngIf="appointment.appointmentStatus === 'Cancelled'"></i>
+                    <i class="fas fa-clock" *ngIf="appointment.appointmentStatus !== 'Completed' && appointment.appointmentStatus !== 'Cancelled'"></i>
+                    {{ appointment.appointmentStatus | titlecase }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Appointment Details -->
+              <div class="appointment-details">
+                <div class="detail-row">
+                  <i class="fas fa-calendar-alt detail-icon"></i>
+                  <span>{{ formatDate(appointment.appointmentDate) }}</span>
+                </div>
+                <div class="detail-row">
+                  <i class="fas fa-clock detail-icon"></i>
+                  <span>{{ formatTime(appointment.appointmentStartTime) }} - {{ formatTime(appointment.appointmentEndTime) }}</span>
+                </div>
+                <div class="detail-row">
+                  <i class="fas fa-hashtag detail-icon"></i>
+                  <span>Appointment #{{ appointment.appointmentId }}</span>
+                </div>
+                <div class="detail-row" *ngIf="appointment.filePath">
+                  <i class="fas fa-file-medical detail-icon"></i>
+                  <span>Medical History: {{ appointment.fileName }}</span>
+                </div>
+              </div>
+
+              <!-- Actions for Past Appointments -->
+              <div class="appointment-actions">
+                <!-- View Prescription Button (only for completed appointments) -->
+                <button 
+                  *ngIf="appointment.appointmentStatus === 'Completed'" 
+                  class="btn btn-outline-info btn-sm" 
+                  (click)="viewPrescription(appointment)">
+                  <i class="fas fa-prescription-bottle-alt me-1"></i>View Prescription
+                </button>
+                <button 
+                  *ngIf="appointment.filePath" 
+                  class="btn btn-outline-success btn-sm" 
+                  (click)="downloadMedicalHistory(appointment)">
+                  <i class="fas fa-download me-1"></i>Download File
+                </button>
+                <button class="btn btn-outline-primary btn-sm" routerLink="/doctor/{{ appointment.doctorId }}">
+                  <i class="fas fa-redo me-1"></i>Book Follow-up
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State for All Appointments -->
+      <div *ngIf="!isLoading && !error && upcomingAppointments.length === 0 && pastAppointments.length === 0" class="empty-state text-center py-5">
+        <div class="empty-icon">
+          <i class="fas fa-calendar fa-3x text-muted"></i>
+        </div>
+        <h4 class="mt-3">No appointments found</h4>
+        <p class="text-muted mb-4">You haven't booked any appointments yet.</p>
+        <button class="btn btn-primary" routerLink="/doctors">
+          <i class="fas fa-plus me-2"></i>Book Your First Appointment
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reschedule Modal -->
+  <div *ngIf="showRescheduleModal" class="modal-overlay" (click)="closeRescheduleModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-edit me-2"></i>Reschedule Appointment
+          </h5>
+          <button type="button" class="btn-close" (click)="closeRescheduleModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <div class="modal-body">
+          <div *ngIf="selectedAppointmentForReschedule" class="current-appointment-info mb-4">
+            <h6 class="text-muted">Current Appointment:</h6>
+            <div class="appointment-summary p-3 bg-light rounded">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <strong>{{ selectedAppointmentForReschedule.doctorName || 'Doctor' }}</strong>
+                  <div class="text-muted small">
+                    {{ formatDate(selectedAppointmentForReschedule.appointmentDate) }}
+                  </div>
+                  <div class="text-muted small">
+                    {{ formatTime(selectedAppointmentForReschedule.appointmentStartTime) }} - 
+                    {{ formatTime(selectedAppointmentForReschedule.appointmentEndTime) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <form>
+            <div class="mb-3">
+              <label for="rescheduleDate" class="form-label">
+                <i class="fas fa-calendar-day me-2"></i>Date (Today Only)
+              </label>
+              <input 
+                type="date" 
+                id="rescheduleDate"
+                class="form-control" 
+                [(ngModel)]="rescheduleForm.date"
+                name="rescheduleDate"
+                [min]="getTodayDateString()"
+                [max]="getTodayDateString()"
+                readonly
+                title="Appointments can only be rescheduled for today"
+                (change)="onRescheduleDateChange()"
+                required>
+              <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                Appointments can only be rescheduled for today
+              </small>
+            </div>
+
+            <!-- Loading slots indicator -->
+            <div *ngIf="loadingSlots" class="text-center mb-3">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading slots...</span>
+              </div>
+              <small class="text-muted ms-2">Loading available time slots...</small>
+            </div>
+
+            <!-- Available slots info with status breakdown -->
+            <div *ngIf="!loadingSlots && rescheduleForm.date && availableSlots.length === 0" class="alert alert-warning mb-3">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              No slots found for this doctor. Please select a different date.
+            </div>
+
+            <div *ngIf="!loadingSlots && availableSlots.length > 0" class="mb-3">
+              <label class="form-label">
+                <i class="fas fa-clock me-2"></i>Available Time Slots for Today
+                <small class="text-muted">({{ availableSlots.length }} total slots for {{ getTodayFormatted() }})</small>
+              </label>
+              
+              <!-- Slot status legend -->
+              <div class="slot-legend mb-3">
+                <div class="legend-item">
+                  <span class="legend-color available"></span>
+                  <span class="legend-text">Available Today</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color busy"></span>
+                  <span class="legend-text">Booked Today</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color not-available"></span>
+                  <span class="legend-text">Time Passed Today</span>
+                </div>
+              </div>
+              
+              <!-- Slot selection grid - SHOW ALL SLOTS -->
+              <div class="slot-selection-grid">
+                <button 
+                  type="button"
+                  *ngFor="let slot of availableSlots" 
+                  [class]="getSlotStatusClass(slot)"
+                  [disabled]="!isSlotSelectable(slot)"
+                  (click)="onRescheduleTimeSelect(slot.startTime)"
+                  [title]="getSlotStatusText(slot)">
+                  <div class="slot-time">
+                    {{ formatTimeForDisplay(slot.startTime) }} - {{ formatTimeForDisplay(slot.endTime) }}
+                  </div>
+                  <div class="slot-status-text">
+                    {{ getSlotStatusText(slot) }}
+                  </div>
+                </button>
+              </div>
+              
+              <!-- Slot status summary -->
+              <div class="slot-summary mt-3">
+                <small class="text-muted">
+                  Available: {{ getSlotCountByStatus('Available') }} | 
+                  Booked: {{ getSlotCountByStatus('Busy') }} | 
+                  Not Available: {{ getSlotCountByStatus('Not_Available') }}
+                </small>
+              </div>
+            </div>
+
+            <!-- Fallback dropdowns when no slots available -->
+            <div *ngIf="!loadingSlots && availableSlots.length === 0 && rescheduleForm.date" class="row">
+              <div class="col-md-6 mb-3">
+                <label for="rescheduleStartTime" class="form-label">
+                  <i class="fas fa-clock me-2"></i>Start Time
+                </label>
+                <select 
+                  id="rescheduleStartTime"
+                  class="form-control" 
+                  [(ngModel)]="rescheduleForm.startTime"
+                  name="rescheduleStartTime"
+                  required>
+                  <option value="">Select Start Time</option>
+                  <option *ngFor="let time of timeOptions" [value]="time">
+                    {{ formatTimeForDisplay(time) }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="rescheduleEndTime" class="form-label">
+                  <i class="fas fa-clock me-2"></i>End Time
+                </label>
+                <select 
+                  id="rescheduleEndTime"
+                  class="form-control" 
+                  [(ngModel)]="rescheduleForm.endTime"
+                  name="rescheduleEndTime"
+                  required>
+                  <option value="">Select End Time</option>
+                  <option *ngFor="let time of timeOptions" [value]="time">
+                    {{ formatTimeForDisplay(time) }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Selected slot summary -->
+            <div *ngIf="rescheduleForm.startTime && rescheduleForm.endTime" class="alert alert-info">
+              <i class="fas fa-check-circle me-2"></i>
+              <strong>New appointment time:</strong> 
+              {{ formatTimeForDisplay(rescheduleForm.startTime) }} - {{ formatTimeForDisplay(rescheduleForm.endTime) }}
+              on {{ rescheduleForm.date | date:'fullDate' }}
+            </div>
+          </form>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeRescheduleModal()">
+            <i class="fas fa-times me-2"></i>Cancel
+          </button>
+          <button type="button" class="btn btn-primary" (click)="saveReschedule()">
+            <i class="fas fa-save me-2"></i>Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prescription Modal -->
+  <div class="modal fade" [class.show]="showPrescriptionModal" [style.display]="showPrescriptionModal ? 'block' : 'none'" *ngIf="showPrescriptionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-prescription-bottle-alt me-2"></i>Prescription Details
+          </h5>
+          <button type="button" class="btn-close" (click)="closePrescriptionModal()"></button>
+        </div>
+        
+        <div class="modal-body">
+          <!-- Loading State -->
+          <div *ngIf="prescriptionLoading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading prescription...</span>
+            </div>
+            <p class="mt-2">Loading prescription details...</p>
+          </div>
+
+          <!-- No Prescription Found -->
+          <div *ngIf="!prescriptionLoading && !currentPrescription" class="text-center py-4">
+            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+            <h5>No Prescription Found</h5>
+            <p class="text-muted">No prescription has been added for this appointment yet.</p>
+          </div>
+
+          <!-- Prescription Details -->
+          <div *ngIf="!prescriptionLoading && currentPrescription" class="prescription-details">
+            <!-- Header Info -->
+            <div class="prescription-header mb-4">
+              <div class="row">
+                <div class="col-md-6">
+                  <h6><i class="fas fa-user me-2"></i>Patient Information</h6>
+                  <p class="mb-1"><strong>Name:</strong> {{ currentPrescription.patient?.userName || 'N/A' }}</p>
+                  <p class="mb-1"><strong>Email:</strong> {{ currentPrescription.patient?.email || 'N/A' }}</p>
+                  <p class="mb-0"><strong>Patient ID:</strong> {{ currentPrescription.patientId }}</p>
+                </div>
+                <div class="col-md-6">
+                  <h6><i class="fas fa-calendar me-2"></i>Prescription Info</h6>
+                  <p class="mb-1"><strong>Appointment ID:</strong> {{ currentPrescription.appointmentId }}</p>
+                  <p class="mb-1"><strong>Doctor ID:</strong> {{ currentPrescription.doctorId }}</p>
+                  <p class="mb-0"><strong>Prescribed On:</strong> {{ formatDate(currentPrescription.prescribedOn) }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="prescription-instructions mb-4">
+              <h6><i class="fas fa-notes-medical me-2"></i>Doctor's Instructions</h6>
+              <div class="instruction-box">
+                {{ currentPrescription.instructions || 'No specific instructions provided.' }}
+              </div>
+            </div>
+
+            <!-- Medicines -->
+            <div class="prescription-medicines">
+              <h6><i class="fas fa-pills me-2"></i>Prescribed Medicines</h6>
+              <div *ngIf="currentPrescription.medicines && currentPrescription.medicines.length > 0">
+                <div class="medicine-card" *ngFor="let medicine of currentPrescription.medicines; let i = index">
+                  <div class="medicine-header">
+                    <span class="medicine-number">{{ i + 1 }}</span>
+                    <span class="medicine-type">{{ getMedicineTypeName(medicine.medicineType) }}</span>
+                  </div>
+                  <div class="medicine-details">
+                    <div class="medicine-item">
+                      <i class="fas fa-pills me-2"></i>
+                      <strong>Dosage:</strong> {{ getDosageName(medicine.dosages) }}
+                    </div>
+                    <div class="medicine-item">
+                      <i class="fas fa-clock me-2"></i>
+                      <strong>Schedule:</strong> {{ getScheduleTimeName(medicine.scheduleTime) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="!currentPrescription.medicines || currentPrescription.medicines.length === 0" class="text-muted text-center py-3">
+                <i class="fas fa-info-circle me-2"></i>No medicines prescribed for this appointment.
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closePrescriptionModal()">
+            <i class="fas fa-times me-2"></i>Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

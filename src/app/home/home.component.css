@@ -1,0 +1,150 @@
+.welcome-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.welcome-content h1 {
+  font-size: 3.5rem;
+  line-height: 1.2;
+}
+
+.welcome-content .text-primary {
+  color: #ffd700 !important;
+}
+
+.welcome-content p.lead {
+  font-size: 1.3rem;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.action-buttons .btn {
+  border-radius: 50px;
+  padding: 12px 30px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.action-buttons .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.feature-item i {
+  font-size: 1.5rem;
+}
+
+.hero-image {
+  max-width: 400px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.stats-cards .stat-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 20px 10px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 0 5px;
+}
+
+.stats-cards h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: #ffd700;
+}
+
+.stats-cards p {
+  margin: 5px 0 0 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.quick-actions {
+  padding: 80px 0;
+}
+
+.action-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.action-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+.action-card .btn {
+  border-radius: 25px;
+  padding: 10px 25px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .welcome-content h1 {
+    font-size: 2.5rem;
+  }
+  
+  .welcome-content p.lead {
+    font-size: 1.1rem;
+  }
+  
+  .action-buttons .btn {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  
+  .hero-image {
+    max-width: 300px;
+    margin-top: 40px;
+  }
+  
+  .stats-cards {
+    margin-top: 30px;
+  }
+  
+  .stats-cards .stat-card {
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .welcome-section {
+    padding: 60px 0;
+  }
+  
+  .welcome-content h1 {
+    font-size: 2rem;
+  }
+  
+  .quick-actions {
+    padding: 50px 0;
+  }
+} 

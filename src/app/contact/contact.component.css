@@ -1,0 +1,156 @@
+/* Contact Component - Clean Professional Design */
+
+.contact-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+.contact-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.contact-header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+/* Main Content Layout */
+.contact-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 80px;
+    justify-content: center;
+}
+
+/* Left side - Image */
+.contact-image {
+    flex: 1;
+    max-width: 500px;
+}
+
+.contact-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Right side - Contact Details */
+.contact-details {
+    flex: 1;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+}
+
+/* Office Section */
+.office-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+}
+
+.office-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.office-info p {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #666;
+}
+
+.address {
+    margin-bottom: 10px !important;
+}
+
+.phone,
+.email {
+    font-weight: 500;
+}
+
+/* Careers Section */
+.careers-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 15px;
+    letter-spacing: 0.5px;
+}
+
+.careers-text {
+    font-size: 1rem;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .contact-container {
+        padding: 40px 20px;
+    }
+    
+    .contact-header h1 {
+        font-size: 2rem;
+    }
+    
+    .contact-content {
+        flex-direction: column;
+        gap: 40px;
+        align-items: center;
+    }
+    
+    .contact-image {
+        max-width: 100%;
+    }
+    
+    .contact-details {
+        max-width: 100%;
+        gap: 30px;
+    }
+    
+    .office-section h2,
+    .careers-section h2 {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .contact-container {
+        padding: 30px 15px;
+    }
+    
+    .contact-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .contact-content {
+        gap: 30px;
+    }
+    
+    .office-info p,
+    .careers-text {
+        font-size: 0.9rem;
+    }
+    
+    .explore-jobs-btn {
+        padding: 10px 25px;
+        font-size: 0.9rem;
+    }
+} 

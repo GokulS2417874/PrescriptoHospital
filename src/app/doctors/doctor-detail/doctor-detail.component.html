@@ -1,0 +1,266 @@
+<div class="container-fluid py-4">
+  <div class="row" *ngIf="doctor">
+    
+    <!-- Doctor Profile Section -->
+    <div class="col-12">
+      <div class="doctor-profile-card">
+        <div class="row">
+          <!-- Doctor Image -->
+          <div class="col-md-4">
+            <div class="doctor-image-container">
+              <div *ngIf="!isImageBroken(doctor.image || '')" class="doctor-profile-image">
+                <img 
+                  [src]="doctor?.image || ''" 
+                  [alt]="doctor?.name || doctor?.userName || 'Doctor'"
+                  (error)="markImageAsBroken(doctor?.image || '')"
+                  class="doctor-profile-img">
+              </div>
+              <div *ngIf="isImageBroken(doctor.image || '')" class="doctor-profile-placeholder">
+                <i class="fas fa-user-md fa-4x text-primary"></i>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Doctor Details -->
+          <div class="col-md-8">
+            <div class="doctor-info">
+              <h2 class="doctor-name">
+                {{ doctor?.userName || doctor?.name || 'Dr. Unknown' }}
+                <i class="fas fa-check-circle text-primary ms-2" title="Verified Doctor"></i>
+              </h2>
+              <p class="doctor-qualification">{{ doctor?.qualification || 'MD' }} - {{ doctor?.specialization || 'General Medicine' }}</p>
+              <p class="doctor-experience">{{ doctor?.experienceYears || 5 }} Years</p>
+              
+              <!-- About Section -->
+              <div class="about-section">
+                <h5>About <i class="fas fa-info-circle"></i></h5>
+                <p class="about-text">{{ doctor?.about || 'Professional ' + (doctor?.specialization || 'specialist') + ' with ' + (doctor?.experienceYears || 5) + ' years of experience in medical practice.' }}</p>
+              </div>
+              
+              <!-- Appointment Fee -->
+              <div class="appointment-fee">
+                <h5>Appointment fee: <span class="fee-amount">₹{{ doctor?.consultantFees || doctor?.consultant_fees || doctor?.consultationFee || 500 }}</span></h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking Slots Section -->
+    <div class="col-12 mt-4">
+      <div class="booking-slots-card">
+        <h4 class="mb-4">Booking slots</h4>
+        
+        <!-- Doctor's Current Shift Display (SINGLE SHIFT ONLY) -->
+        <div class="current-shift-display mb-4">
+          <!-- Loading shift detection -->
+          <div *ngIf="isDetectingShift" class="shift-loading text-center">
+            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+            <span class="text-muted">Detecting doctor's working shift...</span>
+          </div>
+
+        <!-- Current Date Display (TODAY ONLY) -->
+        <div class="current-date-display mb-4">
+          <div class="today-banner">
+            <i class="fas fa-calendar-day me-2"></i>
+            <span class="today-text">Appointments for Today Only</span>
+            <span class="today-date">{{ getCurrentDateFormatted() }}</span>
+          </div>
+          <small class="text-muted">
+            <i class="fas fa-info-circle me-1"></i>
+            Bookings are only available for today. Future date booking is not allowed.
+          </small>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoadingSlots" class="loading-slots text-center py-4">
+          <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+          <p class="mt-2 text-muted">Loading doctor schedule...</p>
+        </div>
+
+        <!-- Complete Doctor Schedule Display -->
+        <div *ngIf="!isLoadingSlots && hasAnySlots()" class="time-slots-section">
+          
+          <!-- Slot Status Legend -->
+          <div class="slot-legend mb-4">
+            <h6 class="legend-title">
+              <i class="fas fa-calendar-day me-2"></i>Today's Schedule Only
+              <small class="text-muted">({{ getCurrentDateFormatted() }})</small>
+            </h6>
+            <div class="legend-items">
+              <div class="legend-item">
+                <span class="legend-color available"></span>
+                <span class="legend-text">Available Today</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color busy"></span>
+                <span class="legend-text">Booked Today</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color not-available"></span>
+                <span class="legend-text">Not Available (Time Passed)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Time Slots Grid - ALL STATUSES -->
+          <div class="time-slots-grid">
+            <div 
+              *ngFor="let slot of getAllTimeSlots()"
+              [class]="getSlotStatusClass(slot)"
+              [title]="getSlotStatusText(slot) + ' - ' + slot.time"
+              (click)="selectTimeSlot(slot)">
+              
+              <div class="slot-time">{{ slot.time }}</div>
+              <div class="slot-status">
+                <i [class]="getSlotStatusIcon(slot)"></i>
+                <span class="status-text">{{ getSlotStatusText(slot) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slot Summary for TODAY -->
+          <div class="slot-summary mt-3">
+            <div class="summary-stats">
+              <div class="stat-item">
+                <span class="stat-number">{{ getAvailableSlotCount() }}</span>
+                <span class="stat-label">Available Today</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ getBusySlotCount() }}</span>
+                <span class="stat-label">Booked Today</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ getNotAvailableSlotCount() }}</span>
+                <span class="stat-label">Time Passed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Slots Available -->
+        <div *ngIf="!isLoadingSlots && !hasAnySlots()" class="no-slots-message text-center py-4">
+          <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+          <h5 class="text-muted">No schedule available for today</h5>
+          <p class="text-muted">
+            No doctors are working during <strong>{{ getShiftName(selectedShift) }}</strong> shift today ({{ getCurrentDateFormatted() }}).
+          </p>
+          <p class="text-muted">Try selecting a different shift or come back tomorrow.</p>
+        </div>
+
+        <!-- Medical History Upload -->
+        <div class="medical-history-upload mt-5" *ngIf="getAvailableSlotCount() > 0">
+          <h5><i class="fas fa-file-medical me-2"></i>Medical History Upload <span class="text-danger">*Required</span></h5>
+          <div class="upload-info mb-3">
+            <i class="fas fa-info-circle me-2"></i>
+            Please upload your medical history (PDF format, max 5MB) to help the doctor understand your condition better.
+          </div>
+          
+          <div class="file-upload-area">
+            <input 
+              type="file" 
+              id="medicalHistoryFile"
+              class="file-input" 
+              accept=".pdf"
+              (change)="onFileSelected($event)">
+            <label for="medicalHistoryFile" class="file-upload-btn">
+              <i class="fas fa-cloud-upload-alt me-2"></i>
+              Choose PDF File
+            </label>
+            
+            <!-- Selected File Display -->
+            <div *ngIf="selectedFile" class="selected-file-info mt-3">
+              <div class="file-details">
+                <i class="fas fa-file-pdf text-danger me-2"></i>
+                <span class="file-name">{{ selectedFile?.name || '' }}</span>
+                <span class="file-size">({{ selectedFile ? getFileSize(selectedFile.size) : '' }})</span>
+                <button 
+                  type="button" 
+                  class="btn btn-sm btn-outline-danger ms-3"
+                  (click)="removeFile()">
+                  <i class="fas fa-times"></i> Remove
+                </button>
+              </div>
+            </div>
+            
+            <!-- Upload Error -->
+            <div *ngIf="fileUploadError" class="alert alert-danger mt-3">
+              <i class="fas fa-exclamation-triangle me-2"></i>{{ fileUploadError }}
+            </div>
+          </div>
+        </div>
+
+
+
+        <!-- Book Appointment Button -->
+        <div class="booking-action mt-4" *ngIf="getAvailableSlotCount() > 0">
+          <button 
+            class="book-appointment-button"
+            [disabled]="!selectedTimeSlot || !selectedFile || isBookingAppointment"
+            (click)="handleBookingClick()">
+            <span *ngIf="isBookingAppointment">
+              <i class="fas fa-spinner fa-spin me-2"></i>Booking appointment...
+            </span>
+            <span *ngIf="!isBookingAppointment">
+              Book an appointment
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related Doctors -->
+    <div class="col-12 mt-5" *ngIf="relatedDoctors.length > 0">
+      <div class="related-doctors">
+        <h4 class="mb-4">Related Doctors</h4>
+        <div class="row">
+          <div *ngFor="let relatedDoctor of relatedDoctors" class="col-md-4 mb-3">
+            <div class="related-doctor-card">
+              <div class="related-doctor-image">
+                <div *ngIf="!isImageBroken(relatedDoctor.image || '')" class="related-doctor-img">
+                  <img 
+                    [src]="relatedDoctor.image" 
+                    [alt]="relatedDoctor.userName"
+                    (error)="markImageAsBroken(relatedDoctor.image || '')"
+                    class="img-fluid">
+                </div>
+                <div *ngIf="isImageBroken(relatedDoctor.image || '')" class="related-doctor-placeholder">
+                  <i class="fas fa-user-md fa-2x text-primary"></i>
+                </div>
+              </div>
+              <div class="related-doctor-info">
+                <h6>{{ relatedDoctor.userName }}</h6>
+                <p>{{ relatedDoctor.specialization }}</p>
+                <p class="fee">₹{{ relatedDoctor.consultant_fees }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Authentication Modals -->
+  <div *ngIf="showAuthModal" class="modal-overlay" (click)="closeAuthModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h5>Login Required</h5>
+      <p>Please login to book an appointment.</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" (click)="redirectToLogin()">Login</button>
+        <button class="btn btn-outline-secondary" (click)="redirectToRegister()">Register</button>
+        <button class="btn btn-secondary" (click)="closeAuthModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showAccessDeniedModal" class="modal-overlay" (click)="closeAccessDeniedModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h5>Access Restricted</h5>
+      <p>Only patients can book appointments. Please login with a patient account.</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" (click)="closeAccessDeniedModal()">OK</button>
+      </div>
+    </div>
+  </div>
+</div>

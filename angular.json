@@ -15,6 +15,9 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
+            "polyfills": [
+              "zone.js"
+            ],
             "assets": [
               {
                 "glob": "**/*",
@@ -22,6 +25,7 @@
               }
             ],
             "styles": [
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles.css"
             ],
             "server": "src/main.server.ts",
@@ -86,5 +90,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "d7841327-735c-46cb-be73-6db0d70ff2bd"
   }
 }

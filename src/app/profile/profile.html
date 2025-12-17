@@ -1,0 +1,483 @@
+<div class="profile-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading your profile...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-container">
+    <div class="error-message">
+      <i class="fas fa-exclamation-triangle"></i>
+      <p>{{ error }}</p>
+      <button class="btn btn-primary" (click)="loadUserProfile()">Try Again</button>
+    </div>
+  </div>
+
+  <!-- Profile Content -->
+  <div *ngIf="!isLoading && !error && userProfile" class="profile-content">
+    
+    <!-- VIEW MODE -->
+    <div *ngIf="!isEditMode">
+      <!-- Header Section -->
+      <div class="profile-header">
+        <div class="profile-avatar-large">
+          <img *ngIf="userProfile.avatar && !isImageBroken(userProfile.avatar)" 
+               [src]="userProfile.avatar" 
+               [alt]="userProfile.userName || userProfile.email" 
+               class="profile-avatar-img"
+               (error)="markImageAsBroken(userProfile.avatar)">
+          <i *ngIf="!userProfile.avatar || isImageBroken(userProfile.avatar)" class="fas fa-user"></i>
+        </div>
+        <h2 class="profile-name">{{ userProfile.userName || userProfile.email }}</h2>
+        <p class="profile-role">{{ getCurrentUserRole() }}</p>
+      </div>
+
+      <!-- Contact Information Section -->
+      <div class="info-section">
+        <h3 class="section-title">CONTACT INFORMATION</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label class="info-label">Email:</label>
+            <span class="info-value email">{{ userProfile.email }}</span>
+          </div>
+          <div class="info-item">
+            <label class="info-label">Phone:</label>
+            <span class="info-value">{{ formatPhoneNumber(userProfile.phoneNumber) }}</span>
+          </div>
+          <div class="info-item" *ngIf="getCurrentUserRole() === 'Patient'">
+            <label class="info-label">Patient ID:</label>
+            <span class="info-value">#{{ userProfile.userId }}</span>
+          </div>
+          <div class="info-item" *ngIf="getCurrentUserRole() === 'Doctor'">
+            <label class="info-label">Doctor ID:</label>
+            <span class="info-value">#{{ userProfile.userId }}</span>
+          </div>
+          <div class="info-item" *ngIf="getCurrentUserRole() === 'HelpDesk'">
+            <label class="info-label">Agent ID:</label>
+            <span class="info-value">#{{ userProfile.agentId || userProfile.userId }}</span>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- Personal Information Section - Only for Patients -->
+      <div class="info-section" *ngIf="userProfile.role === 'Patient'">
+        <h3 class="section-title">PERSONAL INFORMATION</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label class="info-label">Date of Birth:</label>
+            <span class="info-value">{{ formatDate(userProfile.dateOfBirth) || 'Not provided' }}</span>
+          </div>
+          <div class="info-item">
+            <label class="info-label">Gender:</label>
+            <span class="info-value">{{ userProfile.gender || 'Not specified' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Professional Information Section - Only for Doctors -->
+      <div class="info-section" *ngIf="userProfile.role === 'Doctor'">
+        <h3 class="section-title">PROFESSIONAL INFORMATION</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label class="info-label">Specialization:</label>
+            <span class="info-value">{{ userProfile.specialization || 'Not specified' }}</span>
+          </div>
+          <div class="info-item">
+            <label class="info-label">Qualification:</label>
+            <span class="info-value">{{ userProfile.qualification || 'Not specified' }}</span>
+          </div>
+          <div class="info-item">
+            <label class="info-label">Experience:</label>
+            <span class="info-value">{{ userProfile.experienceYears || 0 }} years</span>
+          </div>
+          <div class="info-item">
+            <label class="info-label">Consultation Fee:</label>
+            <span class="info-value">₹{{ userProfile.consultant_fees || 'Not set' }}</span>
+          </div>
+          <div class="info-item">
+            <label class="info-label">Status:</label>
+            <span class="info-value" [class.online]="userProfile.active_Status === 'Online'" [class.offline]="userProfile.active_Status === 'Offline'">
+              {{ userProfile.active_Status || 'Offline' }}
+            </span>
+          </div>
+          <div class="info-item">
+            <label class="info-label">Languages:</label>
+            <span class="info-value">{{ userProfile.languages || 'Not specified' }}</span>
+          </div>
+          <div class="info-item">
+            <label class="info-label">Shift:</label>
+            <span class="info-value">{{ userProfile.shift || 'Not allocated' }}</span>
+          </div>
+          <div class="info-item" *ngIf="userProfile.shiftStartTime && userProfile.shiftEndTime">
+            <label class="info-label">Shift Timing:</label>
+            <span class="info-value">{{ userProfile.shiftStartTime }} - {{ userProfile.shiftEndTime }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Work Information Section - Only for HelpDesk -->
+      <div class="info-section" *ngIf="userProfile.role === 'HelpDesk'">
+        <h3 class="section-title">WORK INFORMATION</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label class="info-label">Status:</label>
+            <span class="info-value" [class.online]="userProfile.active_Status === 'Online'" [class.offline]="userProfile.active_Status === 'Offline'">
+              {{ userProfile.active_Status || 'Offline' }}
+            </span>
+          </div>
+          <div class="info-item">
+            <label class="info-label">Shift:</label>
+            <span class="info-value">{{ userProfile.shift || 'Not allocated' }}</span>
+          </div>
+          <div class="info-item" *ngIf="userProfile.shiftStartTime && userProfile.shiftEndTime">
+            <label class="info-label">Shift Timing:</label>
+            <span class="info-value">{{ userProfile.shiftStartTime }} - {{ userProfile.shiftEndTime }}</span>
+          </div>
+          <div class="info-item">
+            <label class="info-label">Registered By:</label>
+            <span class="info-value">{{ userProfile.registeredBy || 'System' }}</span>
+          </div>
+          <div class="info-item">
+            <label class="info-label">Approval Status:</label>
+            <span class="info-value" [class.approved]="userProfile.isApprovedByAdmin === 'Approved'" [class.pending]="userProfile.isApprovedByAdmin === 'Pending'">
+              {{ userProfile.isApprovedByAdmin || 'Pending' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Contact Section - For All User Types -->
+      <div class="info-section">
+        <h3 class="section-title">EMERGENCY CONTACT</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label class="info-label">Contact Name:</label>
+            <span class="info-value">{{ userProfile.emergencyContactName || 'Not provided' }}</span>
+          </div>
+          <div class="info-item">
+            <label class="info-label">Contact Phone:</label>
+            <span class="info-value">{{ formatPhoneNumber(userProfile.emergencyContactPhoneNumber) || 'Not provided' }}</span>
+          </div>
+          <div class="info-item">
+            <label class="info-label">Relationship:</label>
+            <span class="info-value">{{ userProfile.emergencyContactRelationship || 'Not provided' }}</span>
+          </div>
+          <div class="info-item" *ngIf="userProfile.emergencyContactEmail">
+            <label class="info-label">Contact Email:</label>
+            <span class="info-value email">{{ userProfile.emergencyContactEmail }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Button -->
+      <div class="edit-section">
+        <button class="btn edit-btn" (click)="editProfile()">
+          <i class="fas fa-edit me-2"></i>Edit Profile
+        </button>
+        <button class="btn btn-secondary ms-2" (click)="goBack()">
+          <i class="fas fa-arrow-left me-2"></i>Back to Home
+        </button>
+      </div>
+    </div>
+
+    <!-- EDIT MODE -->
+    <div *ngIf="isEditMode" class="edit-mode">
+      <div class="profile-header">
+        <div class="profile-avatar-large">
+          <i class="fas fa-user-edit"></i>
+        </div>
+        <h2 class="profile-name">Edit Your Profile</h2>
+        <p class="profile-role">Update your information</p>
+      </div>
+
+      <form (ngSubmit)="saveProfile()" #profileForm="ngForm">
+        <!-- Basic Information - For All Users -->
+        <div class="info-section">
+          <h3 class="section-title">BASIC INFORMATION</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="username">Full Name *</label>
+              <input 
+                type="text" 
+                id="username" 
+                name="username"
+                [(ngModel)]="editFormData.UserName" 
+                class="form-control" 
+                required 
+                placeholder="Enter your full name">
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email Address *</label>
+              <input 
+                type="email" 
+                id="email" 
+                name="email"
+                [(ngModel)]="editFormData.Email" 
+                class="form-control" 
+                required 
+                placeholder="Enter your email">
+            </div>
+
+            <div class="form-group">
+              <label for="phoneNumber">Phone Number</label>
+              <input 
+                type="tel" 
+                id="phoneNumber" 
+                name="phoneNumber"
+                [(ngModel)]="editFormData.PhoneNumber" 
+                class="form-control" 
+                placeholder="Enter your phone number">
+            </div>
+          </div>
+        </div>
+
+        <!-- Personal Information - Only for Patients -->
+        <div class="info-section" *ngIf="userProfile.role === 'Patient'">
+          <h3 class="section-title">PERSONAL INFORMATION</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="dateOfBirth">Date of Birth</label>
+              <input 
+                type="date" 
+                id="dateOfBirth" 
+                name="dateOfBirth"
+                [(ngModel)]="editFormData.DateOfBirth" 
+                class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="gender">Gender</label>
+              <select 
+                id="gender" 
+                name="gender"
+                [(ngModel)]="editFormData.Gender" 
+                class="form-control">
+                <option value="">Select Gender</option>
+                <option *ngFor="let gender of genderOptions" [value]="gender">{{ gender }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Professional Information - Read-Only for Doctors -->
+        <div class="info-section" *ngIf="userProfile.role === 'Doctor'">
+          <h3 class="section-title">PROFESSIONAL INFORMATION</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="specialization">Specialization</label>
+              <input 
+                type="text" 
+                id="specialization" 
+                name="specialization"
+                [value]="userProfile.specialization || 'Not specified'" 
+                class="form-control" 
+                readonly
+                placeholder="Specialization (Read-only)">
+              <small class="form-text text-muted">Contact admin to change specialization</small>
+            </div>
+            <div class="form-group">
+              <label for="qualification">Qualification</label>
+              <input 
+                type="text" 
+                id="qualification" 
+                name="qualification"
+                [value]="userProfile.qualification || 'Not specified'" 
+                class="form-control" 
+                readonly
+                placeholder="Qualification (Read-only)">
+              <small class="form-text text-muted">Contact admin to change qualification</small>
+            </div>
+            <div class="form-group">
+              <label for="experience">Experience Years</label>
+              <input 
+                type="number" 
+                id="experience" 
+                name="experience"
+                [value]="userProfile.experienceYears || 0" 
+                class="form-control" 
+                readonly
+                placeholder="Experience (Read-only)">
+              <small class="form-text text-muted">Contact admin to update experience</small>
+            </div>
+            <div class="form-group">
+              <label for="consultantFees">Consultation Fee</label>
+              <input 
+                type="number" 
+                id="consultantFees" 
+                name="consultantFees"
+                [value]="userProfile.consultant_fees || 0" 
+                class="form-control" 
+                readonly
+                placeholder="Fee (Read-only)">
+              <small class="form-text text-muted">Contact admin to change consultation fee</small>
+            </div>
+            <div class="form-group">
+              <label for="languages">Languages</label>
+              <input 
+                type="text" 
+                id="languages" 
+                name="languages"
+                [value]="userProfile.languages || 'Not specified'" 
+                class="form-control" 
+                readonly
+                placeholder="Languages (Read-only)">
+              <small class="form-text text-muted">Contact admin to update languages</small>
+            </div>
+            <div class="form-group">
+              <label for="doctorShift">Shift</label>
+              <input 
+                type="text" 
+                id="doctorShift" 
+                name="doctorShift"
+                [value]="userProfile.shift || 'Not allocated'" 
+                class="form-control" 
+                readonly
+                placeholder="Shift (Read-only)">
+              <small class="form-text text-muted">Contact admin to change shift</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Contact Information - For All User Types -->
+        <div class="info-section">
+          <h3 class="section-title">EMERGENCY CONTACT</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="emergencyName">Emergency Contact Name</label>
+              <input 
+                type="text" 
+                id="emergencyName" 
+                name="emergencyName"
+                [(ngModel)]="editFormData.EmergencyContactName" 
+                class="form-control" 
+                placeholder="Enter emergency contact name">
+            </div>
+
+            <div class="form-group">
+              <label for="emergencyRelationship">Relationship</label>
+              <select 
+                id="emergencyRelationship" 
+                name="emergencyRelationship"
+                [(ngModel)]="editFormData.EmergencyContactRelationship" 
+                class="form-control">
+                <option value="">Select Relationship</option>
+                <option *ngFor="let relation of relationshipOptions" [value]="relation">{{ relation }}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="emergencyPhone">Emergency Contact Phone</label>
+              <input 
+                type="tel" 
+                id="emergencyPhone" 
+                name="emergencyPhone"
+                [(ngModel)]="editFormData.EmergencyContactPhoneNumber" 
+                class="form-control" 
+                placeholder="Enter emergency contact phone">
+            </div>
+
+            <div class="form-group">
+              <label for="emergencyEmail">Emergency Contact Email</label>
+              <input 
+                type="email" 
+                id="emergencyEmail" 
+                name="emergencyEmail"
+                [(ngModel)]="editFormData.EmergencyContactEmail" 
+                class="form-control" 
+                placeholder="Enter emergency contact email">
+            </div>
+          </div>
+        </div>
+
+        <!-- Work Information - Read-Only for HelpDesk -->
+        <div class="info-section" *ngIf="userProfile.role === 'HelpDesk'">
+          <h3 class="section-title">WORK INFORMATION</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="helpdeskStatus">Status</label>
+              <input 
+                type="text" 
+                id="helpdeskStatus" 
+                name="helpdeskStatus"
+                [value]="userProfile.active_Status || 'Offline'" 
+                class="form-control" 
+                readonly
+                placeholder="Status (Read-only)">
+              <small class="form-text text-muted">Contact admin to change status</small>
+            </div>
+            <div class="form-group">
+              <label for="helpdeskShift">Shift</label>
+              <input 
+                type="text" 
+                id="helpdeskShift" 
+                name="helpdeskShift"
+                [value]="userProfile.shift || 'Not allocated'" 
+                class="form-control" 
+                readonly
+                placeholder="Shift (Read-only)">
+              <small class="form-text text-muted">Contact admin to change shift</small>
+            </div>
+            <div class="form-group">
+              <label for="shiftTiming">Shift Timing</label>
+              <input 
+                type="text" 
+                id="shiftTiming" 
+                name="shiftTiming"
+                [value]="(userProfile.shiftStartTime || '00:00:00') + ' - ' + (userProfile.shiftEndTime || '00:00:00')" 
+                class="form-control" 
+                readonly
+                placeholder="Shift timing (Read-only)">
+              <small class="form-text text-muted">Contact admin to change shift timing</small>
+            </div>
+            <div class="form-group">
+              <label for="registeredBy">Registered By</label>
+              <input 
+                type="text" 
+                id="registeredBy" 
+                name="registeredBy"
+                [value]="userProfile.registeredBy || 'System'" 
+                class="form-control" 
+                readonly
+                placeholder="Registration method (Read-only)">
+              <small class="form-text text-muted">Shows how account was created</small>
+            </div>
+            <div class="form-group">
+              <label for="approvalStatus">Approval Status</label>
+              <input 
+                type="text" 
+                id="approvalStatus" 
+                name="approvalStatus"
+                [value]="userProfile.isApprovedByAdmin || 'Pending'" 
+                class="form-control" 
+                readonly
+                placeholder="Approval status (Read-only)">
+              <small class="form-text text-muted">Contact admin for approval</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="edit-section">
+          <button 
+            type="submit" 
+            class="btn btn-success"
+            [disabled]="isSaving || !profileForm.form.valid">
+            <i class="fas fa-save me-2" *ngIf="!isSaving"></i>
+            <i class="fas fa-spinner fa-spin me-2" *ngIf="isSaving"></i>
+            {{ isSaving ? 'Saving...' : 'Save Changes' }}
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-secondary ms-2" 
+            (click)="cancelEdit()"
+            [disabled]="isSaving">
+            <i class="fas fa-times me-2"></i>Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div> 
